@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 2703.214 1272.608"
+   style="enable-background:new 0 0 2703.214 1272.608;"
+   xml:space="preserve"
+   sodipodi:docname="infinity-icon.svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   inkscape:export-filename="C:\Users\jackg\Drive\Code\Web\infinity-block\src\assets\app_icon_48.png"
+   inkscape:export-xdpi="31.640465"
+   inkscape:export-ydpi="31.640465"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs11"><linearGradient
+     inkscape:collect="always"
+     id="linearGradient1512-3"><stop
+       style="stop-color:#ffcc00;stop-opacity:1;"
+       offset="0"
+       id="stop2033" /><stop
+       style="stop-color:#ff6600;stop-opacity:1"
+       offset="1"
+       id="stop2035" /></linearGradient><linearGradient
+     inkscape:collect="always"
+     xlink:href="#linearGradient1512-3"
+     id="linearGradient1514"
+     x1="1458.9181"
+     y1="-83.038216"
+     x2="2079.7886"
+     y2="1332.4443"
+     gradientUnits="userSpaceOnUse" /><mask
+     maskUnits="userSpaceOnUse"
+     id="mask3963"><g
+       id="g3969"
+       style="fill:#ffffff;fill-opacity:1">
+	<g
+   id="g3967"
+   style="fill:#ffffff;fill-opacity:1">
+		<path
+   d="M 72.373,651.52 C 62.109,212.429 541.276,-95.972 961.842,145.033 c 138.551,79.397 256.167,196.988 382.632,325.418 5.749,5.839 8.404,5.236 13.785,-0.188 197.808,-199.402 484.222,-503.454 885.399,-385.157 168.833,49.784 286.15,159.321 346.255,324.377 201.16,552.413 -375.869,1009.769 -870.693,706.588 -124.801,-76.466 -232.581,-181.978 -359.98,-311.726 -6.801,-6.927 -9.868,-5.946 -16.086,0.324 -144.739,145.956 -300.538,304.607 -492.977,371.024 C 458.575,1310.846 83.17,1077.492 72.373,651.52 Z m 245.045,-8.512 c 12.485,253.639 207.59,371.88 415.468,326.918 179.653,-38.857 330.36,-196.86 458.721,-328.811 4.325,-4.446 1.9,-6.251 -1.072,-9.025 C 1079.047,528.024 970.17,400.906 832.954,335.49 567.01,208.705 316.523,394.639 317.418,643.008 Z m 2067.847,-10.72 c -7.903,-245.124 -201.289,-378.703 -424.132,-326.433 -175.334,41.126 -325.161,198.381 -449.641,326.279 -4.318,4.437 -2.66,6.509 0.879,9.811 155.637,145.245 339.3,374.567 587.443,332.772 165.289,-27.84 285.82,-171.807 285.451,-342.429 z"
+   id="path3965"
+   style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:57.2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+	</g>
+</g></mask></defs><sodipodi:namedview
+   id="namedview9"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0"
+   inkscape:pagecheckerboard="true"
+   showgrid="false"
+   inkscape:zoom="3.1310875"
+   inkscape:cx="844.75441"
+   inkscape:cy="720.03736"
+   inkscape:window-width="1920"
+   inkscape:window-height="1017"
+   inkscape:window-x="1912"
+   inkscape:window-y="-8"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_1" />
+<rect
+   style="fill:#ffffff;stroke:none;stroke-width:20.8568;stroke-linejoin:round"
+   id="rect1151"
+   width="154.25949"
+   height="154.25949"
+   x="783.75323"
+   y="613.84424"
+   ry="40.735191"
+   inkscape:export-filename="C:\Users\jackg\Drive\Code\Web\infinity-block\src\assets\app_icon_16.png"
+   inkscape:export-xdpi="9.9572496"
+   inkscape:export-ydpi="9.9572496" /><rect
+   style="fill:url(#linearGradient1514);fill-opacity:1;stroke:none;stroke-width:57.2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+   id="rect1325"
+   width="3027.7019"
+   height="1683.76"
+   x="-97.090866"
+   y="-229.95206"
+   mask="url(#mask3963)"
+   transform="matrix(0.04926142,0,0,0.04926142,793.8281,658.5075)"
+   inkscape:export-filename="C:\Users\jackg\Drive\Code\Web\infinity-block\src\assets\app_icon_128.png"
+   inkscape:export-xdpi="3.6024621"
+   inkscape:export-ydpi="3.6024621" />
+</svg>

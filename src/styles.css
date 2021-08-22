@@ -1,1 +1,121 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #282c34;
+  color: #f2f2f2;
+}
+
+
+
+.icon-btn {
+  background: none;
+  background-color: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-btn:hover {
+  cursor: pointer;
+}
+
+.icon-btn img {
+  transition: all 0.25s ease-in-out;
+}
+
+.icon-btn:hover img {
+  transform: scale(1.2);
+}
+
+.icon-btn:active img {
+  transition: all 0.05s ease-in-out;
+  transform: scale(1);
+}
+
+
+
+.text-btn {
+  background: none;
+  border: 2px solid #f2f2f2;
+  border-radius: 6px;
+  color: #f2f2f2;
+  font-weight: bold;
+  font-size: 15px;
+  padding: 10px;
+}
+
+.text-btn:hover {
+  cursor: pointer;
+  background-color: #ffffff33;
+}
+
+.textfield {
+  background: none;
+  border: none;
+  border-bottom: 2px solid #f2f2f2;
+  color: #f2f2f2;
+  background-color: #ffffff15;
+  font-family: inherit;
+  border-radius: 6px;
+}
+
+
+
+app-modal .btn-group {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+app-modal .btn-group button:first-child {
+  margin-right: 10px;
+}
+
+
+
+.toggle-switch > input {
+  display: none;
+}
+
+.toggle-switch {
+  width: 75px;
+  height: 40px;
+  display: block;
+  position: relative;
+}
+
+.toggle-switch > .slider {
+  background-color: #535353;
+  border-radius: 6px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.toggle-switch > .slider:before {
+  position: absolute;
+  content: "Off";
+  top: 4px;
+  left: 4px;
+  width: 45px;
+  height: 32px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  transition: 0.25s;
+}
+
+.toggle-switch > input:checked + .slider:before {
+  content: "On";
+  transform: translateX(22px);
+}

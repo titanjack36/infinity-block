@@ -1,0 +1,5 @@
+<div *ngIf="showModal" class="modal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <ng-content></ng-content>
+  </div>
+</div>

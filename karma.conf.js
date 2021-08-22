@@ -25,7 +25,7 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/dont-you-dare'),
+      dir: require('path').join(__dirname, './coverage/infinity-block'),
       subdir: '.',
       reporters: [
         { type: 'html' },

@@ -1,0 +1,110 @@
+<div id="profileWrapper" *ngIf="selectedProfile; else showPrompt">
+  <div id="profileContent">
+    <div class="title-wrapper">
+      <ng-container *ngIf="!isEditingName; else editName">
+        <h2 id="profileTitle">{{ selectedProfile.name }}</h2>
+        <button class="icon-btn" (click)="handleEditName()">
+          <img src="assets/edit.svg" alt="Edit Name">
+        </button>
+      </ng-container>
+      <ng-template #editName>
+        <input
+          #profileNameInput
+          type="text"
+          class="textfield"
+          [(ngModel)]="editedProfileName"
+          (keyup.enter)="handleSaveEditName()"
+          (keyup.escape)="handleCancelEditName()"
+        >
+        <button class="icon-btn" (click)="handleSaveEditName()">
+          <img src="assets/confirm-icon.svg" alt="Cancel Edit">
+        </button>
+        <button class="icon-btn" (click)="handleCancelEditName()">
+          <img src="assets/close.svg" alt="Cancel Edit">
+        </button>
+      </ng-template>
+    </div>
+    <div id="enableProfile">
+      <label class="toggle-switch">
+        <input 
+          type="checkbox"
+          [(ngModel)]="selectedProfile.options.isActive"
+          (change)="handleUpdateOptions()">
+        <span class="slider"></span>
+      </label>
+      <h2>Enable Profile</h2>
+    </div>
+    <h2>Site List</h2>
+    <input
+      id="newSiteUrlField"
+      placeholder="www.example.com"
+      type="text"
+      class="textfield"
+      [(ngModel)]="newSiteUrl"
+      (keyup.enter)="handleAddSite()"
+    >
+    <button class="text-btn" (click)="handleAddSite()">Add Site</button>
+    
+    <div id="siteList">
+      <div *ngFor="let site of selectedProfile.sites; let idx = index">
+        <div>{{ site.url }}</div>
+        <button class="remove-site-btn icon-btn" (click)="handleRemoveSite(idx)">
+          <img src="assets/close.svg" alt="Remove Site">
+        </button>
+      </div>
+    </div>
+    
+  </div>
+  <div id="profileOptions">
+    <h3 class="options-title">Options</h3>
+    <h3>Block Mode</h3>
+    <div id="blockModeSelection">
+      <input
+        type="radio"
+        id="useBlockSites"
+        [value]="BlockMode.BLOCK_SITES"
+        [(ngModel)]="selectedProfile.options.blockMode"
+        (change)="handleUpdateOptions()"
+        >
+      <label for="useBlockSites">
+        Only Block Listed Sites
+        <img src="assets/confirm-icon.svg">
+      </label>
+      <input
+        type="radio"
+        id="useAllowSites"
+        [value]="BlockMode.ALLOW_SITES"
+        [(ngModel)]="selectedProfile.options.blockMode"
+        (change)="handleUpdateOptions()"
+        >
+      <label for="useAllowSites">
+        Only Allow Listed Sites
+        <img src="assets/confirm-icon.svg">
+      </label>
+    </div>
+    <h3>Actions</h3>
+    <button id="deleteProfileBtn" class="text-btn" (click)="showConfirmDeleteModal()">Delete Profile</button>
+  </div>
+</div>
+<ng-template #showPrompt>
+  <div id="createProfilePrompt">
+    <h1>No Profiles</h1>
+    <p>Create a profile by clicking</p>
+    <button id="addProfileBtn" (click)="onCreateProfile.emit()">
+      <img src="assets/plus.svg" alt="Add Profile">
+    </button>
+  </div>
+</ng-template>
+
+<app-modal
+  id="confirmDeleteModal"
+  [showModal]="confirmDeleteModalOpen"
+  (onHideModal)="hideConfirmDeleteModal()"
+>
+  <h1>Confirm Delete</h1>
+  <p>Are you sure you want to delete <b>{{ selectedProfileName }}</b>?</p>
+  <div class="btn-group">
+    <button class="text-btn" (click)="hideConfirmDeleteModal()">No</button>
+    <button class="text-btn" (click)="handleRemoveProfile()">Yes</button>
+  </div>
+</app-modal>

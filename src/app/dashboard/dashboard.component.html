@@ -1,0 +1,57 @@
+<div id="leftbar">
+  <img src="assets/logo.svg" alt="Infinity Block" width="175">
+  <h3>Profiles</h3>
+  <a
+    *ngFor="let profileName of profileNames"
+    class="profile"
+    [class.selected]="profileName == selectedProfileName"
+    routerLink="./"
+    [queryParams]="{profile: profileName}"
+  >
+    <span 
+      class="statusCircle"
+      [class.active]="profileName === activeProfile?.name">
+    </span>
+    {{ profileName }}
+  </a>
+  <button id="addProfileBtn" (click)="showNewProfileModal()">
+    <img src="assets/plus.svg" alt="Add Profile">
+  </button>
+</div>
+<app-profile
+  [selectedProfileName]="selectedProfileName"
+  [profileNameSet]="profileNameSet"
+  (onError)="showErrorModal($event)"
+  (onProfileUpdated)="getProfileNames(); getActiveProfile()"
+  (onCreateProfile)="showNewProfileModal()">
+</app-profile>
+
+<app-modal
+  id="newProfileModal"
+  [showModal]="newProfileModalOpen"
+  (onHideModal)="hideNewProfileModal()"
+  >
+  <h1>New Profile</h1>
+  <label for="newProfileNameInput">Profile Name</label>
+  <input
+    type="text"
+    id="newProfileNameInput"
+    class="textfield"
+    [(ngModel)]="newProfileName"
+    (keyup.enter)="handleAddProfile()"
+  >
+  <div class="btn-group">
+    <button class="text-btn" (click)="hideNewProfileModal()">Cancel</button>
+    <button class="text-btn" (click)="handleAddProfile()">Add</button>
+  </div>
+</app-modal>
+
+<app-modal
+  id="errorModal"
+  [showModal]="errorModalOpen"
+  (onHideModal)="hideErrorModal()"
+>
+  <h1>Error</h1>
+  <div>{{ errorMsg }}</div>
+  <button class="text-btn" (click)="hideErrorModal()">OK</button>
+</app-modal>

@@ -1,11 +1,14 @@
 {
-  "name": "dont-you-dare",
+  "name": "infinity-block",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "build": "npm run ngbuild && npm run wpbuild",
+    "ngbuild": "ng build",
+    "wpbuild": "npx webpack --config webpack.config.js",
+    "ngbuild:w": "npm run ngbuild -- --watch --configuration development",
+    "wpbuild:w": "npm run wpbuild -- --watch",
     "test": "ng test"
   },
   "private": true,
@@ -26,14 +29,19 @@
     "@angular-devkit/build-angular": "~12.2.1",
     "@angular/cli": "~12.2.1",
     "@angular/compiler-cli": "~12.2.0",
+    "@types/chrome": "^0.0.154",
     "@types/jasmine": "~3.8.0",
     "@types/node": "^12.11.1",
+    "filemanager-webpack-plugin": "^6.1.5",
     "jasmine-core": "~3.8.0",
     "karma": "~6.3.0",
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage": "~2.0.3",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "~1.7.0",
-    "typescript": "~4.3.5"
+    "ts-loader": "^9.2.5",
+    "typescript": "~4.3.5",
+    "webpack": "^5.50.0",
+    "webpack-cli": "^4.8.0"
   }
 }
