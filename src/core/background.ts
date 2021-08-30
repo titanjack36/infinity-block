@@ -1,12 +1,15 @@
-import { BlockMode, Profile, Site } from '../models/profile.interface';
-import { Action, Request, Response } from '../models/message.interface';
-import { getAllTabs, getTab, receiveMessage } from '../utils/utils';
+import { BlockMode, Profile, SchedEvent, SchedEventType, Site } from '../models/profile.interface';
+import { Action, Request } from '../models/message.interface';
+import { getAllTabs, getTab, getTimeInSecs, receiveMessage, sendAction } from '../utils/utils';
+import { isSameDay } from 'date-fns';
 
 const defaultRedirectUrl: string = `${chrome.extension.getURL('app/index.html')}#/block`
 
 var profiles: Profile[] = [];
 var activeProfile: Profile | undefined;
 var blockedTabIdMap: Map<number, string> = new Map();
+var pendingSchedEvents: SchedEvent[] = [];
+var prevSavedDate: Date = new Date();
 
 chrome.storage.local.get(['profiles'], result => {
   if (!result) {
@@ -15,6 +18,9 @@ chrome.storage.local.get(['profiles'], result => {
   if (result.profiles) {
    profiles = result.profiles;
    activeProfile = profiles.find(profile => profile.options.isActive);
+  }
+  if (result.prevSavedDate) {
+    prevSavedDate = new Date(result.prevSavedDate);
   }
 });
 
@@ -46,18 +52,14 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
         throw new Error('Updated profile is undefined');
       }
       profileIdx = getProfileIndexFromName(request.body?.profileName);
-      if (profile.options.isActive) {
-        if (activeProfile && activeProfile?.name != profiles[profileIdx].name) {
-          activeProfile.options.isActive = false;
-        }
-        activeProfile = profile;
-        const matchedTabs = await matchAllTabsWithProfile(activeProfile);
-        matchedTabs.forEach(tab => redirectTab(tab));
-      } else if (activeProfile?.name == profile.name) {
-        activeProfile = undefined;
-      }
-      restoreBlockedTabs(activeProfile);
       profiles[profileIdx] = profile;
+      if (profile.options.isActive) {
+        await setActiveProfile(profile.name);
+      } else if (activeProfile?.name == request.body.profileName) {
+        activeProfile = undefined;
+        restoreBlockedTabs(activeProfile);
+      }
+      updatePendingSchedEvents();
       saveProfiles();
       break;
 
@@ -84,21 +86,6 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
       saveProfiles();
       break;
 
-    case Action.UPDATE_SITES:
-      const sites: Site[] | undefined = request.body.sites;
-      if (!sites) {
-        throw new Error('Updates sites are undefined');
-      }
-      profileIdx = getProfileIndexFromName(request.body.profileName);
-      profiles[profileIdx].sites = sites;
-      if (activeProfile) {
-        restoreBlockedTabs(activeProfile);
-        const matchedTabs = await matchAllTabsWithProfile(activeProfile);
-        matchedTabs.forEach(tab => redirectTab(tab));
-      }
-      responseBody = profiles[profileIdx];
-      break;
-
     case Action.UPDATE_PROFILE_NAME:
       if (!request.body.prevProfileName) {
         throw new Error("Previous profile name is undefined");
@@ -109,6 +96,24 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
       profileIdx = getProfileIndexFromName(request.body.prevProfileName);
       profiles[profileIdx].name = request.body.newProfileName;
       responseBody = profiles[profileIdx];
+      saveProfiles();
+      break;
+
+    case Action.UPDATE_SCHEDULE_EVENTS:
+      const events: SchedEvent[] | undefined = request.body.events;
+      if (!events) {
+        throw new Error('Events is undefined');
+      }
+      profileIdx = getProfileIndexFromName(request.body?.profileName);
+      // filter events without date object, and sort by time
+      const processedEvents = events.filter(event => event.time)
+        .sort((ev1, ev2) => {
+          return getTimeInSecs(ev1.time!) - getTimeInSecs(ev2.time!);
+        });
+      profiles[profileIdx].options.schedule.events = processedEvents;
+      updatePendingSchedEvents();
+      responseBody = profiles[profileIdx];
+      saveProfiles();
       break;
 
     case Action.GET_ACTIVE_PROFILE:
@@ -177,6 +182,73 @@ function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl): vo
   chrome.tabs.update(tab.id, { url: redirectUrl });
 }
 
+async function setActiveProfile(profileName: string): Promise<void> {
+  const profileIdx = getProfileIndexFromName(profileName);
+  const profile = profiles[profileIdx];
+  profile.options.isActive = true;
+  if (activeProfile && activeProfile.name != profile.name) {
+    activeProfile.options.isActive = false;
+  }
+  activeProfile = profile;
+  const matchedTabs = await matchAllTabsWithProfile(activeProfile);
+  matchedTabs.forEach(tab => redirectTab(tab));
+  restoreBlockedTabs(activeProfile);
+}
+
 function saveProfiles(): void {
   chrome.storage.local.set({ profiles }, () => {});
 }
+
+function updatePendingSchedEvents(): void {
+  pendingSchedEvents = [];
+  profiles.forEach(profile => {
+    const schedule = profile.options.schedule;
+    if (schedule.isEnabled) {
+      pendingSchedEvents.push(...schedule.events.filter(events => !events.executed));
+    }
+  });
+}
+
+async function checkSchedEvents(): Promise<void> {
+  const remainingEvents = [];
+  for (const event of pendingSchedEvents) {
+    if (getTimeInSecs(event.time!) > getTimeInSecs(new Date())) {
+      try {
+        if (event.eventType == SchedEventType.ENABLE) {
+          await setActiveProfile(event.profileName);
+        } else if (event.profileName == activeProfile?.name) {
+          const profileIdx = getProfileIndexFromName(event.profileName);
+          profiles[profileIdx].options.isActive = false;
+          activeProfile = undefined;
+          restoreBlockedTabs();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      remainingEvents.push(event);
+    }
+  }
+  if (remainingEvents.length != pendingSchedEvents.length) {
+    pendingSchedEvents = remainingEvents;
+    sendAction(Action.NOTIFY_SCHEDULE_TRIGGER);
+  }
+}
+
+setInterval(() => {
+  checkSchedEvents();
+
+  // reset all events if new day
+  const newDate = new Date();
+  if (!isSameDay(prevSavedDate, newDate)) {
+    pendingSchedEvents = [];
+    profiles.forEach(profile => {
+      profile.options.schedule.events.forEach(event => {
+        event.executed = false;
+      });
+    });
+    updatePendingSchedEvents();
+  }
+  prevSavedDate = newDate;
+  chrome.storage.local.set({ prevSavedDate }, () => {});
+}, 5000);

@@ -42,14 +42,6 @@
   padding: 30px 50px;
 }
 
-#profileOptions {
-  box-sizing: border-box;
-  background-color: #21252b;
-  height: 100%;
-  padding: 20px;
-  font-size: 15px;
-}
-
 #newSiteUrlField {
   padding: 10px;
   font-size: 15px;
@@ -96,16 +88,6 @@
   width: 15px;
 }
 
-#deleteProfileBtn {
-  border: 2px solid #c51818;
-  color: #c51818;
-  width: 100%;
-}
-
-#deleteProfileBtn:hover {
-  background-color: #c5181844;
-}
-
 #createProfilePrompt {
   width: 100%;
   height: 100%;
@@ -129,11 +111,6 @@
   margin-top: 0;
 }
 
-#confirmDeleteModal p {
-  font-size: 15px;
-  margin-bottom: 25px;
-}
-
 #addProfileBtn {
   background: rgb(255,221,85);
   background: linear-gradient(162deg, rgba(255,221,85,1) 0%, rgba(255,127,42,1) 100%);
@@ -154,50 +131,15 @@
   opacity: 90%;
 }
 
-#blockModeSelection input {
-  display: none;
-}
-
-#blockModeSelection label {
-  cursor: pointer;
-  width: 300px;
-  border: 1px solid #c7c7c7;
-  border-radius: 6px;
-  padding: 10px;
-  margin: 10px 0;
-
-  display: flex;
-  justify-content: space-between;
-}
-
-#blockModeSelection label > img {
-  width: 15px;
-  visibility: hidden;
-}
-
-#blockModeSelection label:hover {
-  background-color: #ffffff31;
-}
-
-#blockModeSelection input:checked + label {
-  border: 2px solid #ffffff;
-}
-
-#blockModeSelection input:checked + label > img {
-  visibility: visible;
-}
-
 #enableProfile {
   display: flex;
   align-items: center;
 }
 
 #enableProfile h2 {
-  margin-left: 20px;
+  margin-right: 20px;
 }
 
-#enableProfile label {
-  color: #000000;
-  font-weight: bold;
+#enableProfile .toggle-switch {
   font-size: 15px;
 }

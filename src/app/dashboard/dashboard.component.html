@@ -4,7 +4,7 @@
   <a
     *ngFor="let profileName of profileNames"
     class="profile"
-    [class.selected]="profileName == selectedProfileName"
+    [class.selected]="profileName == getSelectedProfileName()"
     routerLink="./"
     [queryParams]="{profile: profileName}"
   >
@@ -18,12 +18,7 @@
     <img src="assets/plus.svg" alt="Add Profile">
   </button>
 </div>
-<app-profile
-  [selectedProfileName]="selectedProfileName"
-  [profileNameSet]="profileNameSet"
-  (onError)="showErrorModal($event)"
-  (onProfileUpdated)="getProfileNames(); getActiveProfile()"
-  (onCreateProfile)="showNewProfileModal()">
+<app-profile (onCreateProfile)="showNewProfileModal()">
 </app-profile>
 
 <app-modal

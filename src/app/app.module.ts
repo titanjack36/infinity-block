@@ -9,6 +9,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { ProfileComponent } from './profile/profile.component';
 import { ModalComponent } from './modal/modal.component';
+import { SelectMenuComponent } from './select-menu/select-menu.component';
+import { ProfileOptionsComponent } from './profile-options/profile-options.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +18,9 @@ import { ModalComponent } from './modal/modal.component';
     BlockPageComponent,
     DashboardComponent,
     ProfileComponent,
-    ModalComponent
+    ModalComponent,
+    SelectMenuComponent,
+    ProfileOptionsComponent
   ],
   imports: [
     BrowserModule,

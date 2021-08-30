@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Action, Response } from '../../models/message.interface';
 import { BlockMode, Profile } from '../../models/profile.interface';
 import { sendAction } from '../../utils/utils';
+import { ProfileService } from '../profile.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,81 +13,66 @@ import { sendAction } from '../../utils/utils';
 export class DashboardComponent implements OnInit {
 
   profileNames: string[] = [];
-  profileNameSet: Set<string> = new Set();
   newProfileName: string = '';
-  selectedProfileName: string | undefined;
   activeProfile: Profile | undefined;
   errorMsg: string = '';
   newProfileModalOpen: boolean = false;
   errorModalOpen: boolean = false;
 
   constructor(
+    private profileService: ProfileService,
     private activatedRoute: ActivatedRoute,
-    private router: Router) { }
+    private router: Router,
+    private cdr: ChangeDetectorRef) { }
 
-  ngOnInit(): void {
-    this.getProfileNames();
-    this.getActiveProfile();
+  async ngOnInit(): Promise<void> {
 
-    this.activatedRoute.queryParams.subscribe(params => {
-      if (!params.profile && this.profileNames.length) {
-        this.router.navigate(['.'], { queryParams: { profile: this.profileNames[0] }});
+    this.profileService.onProfileNamesUpdated().subscribe((profileNames) => {
+      this.profileNames = profileNames;
+    });
+    this.profileService.onActiveProfileUpdated().subscribe((activeProfile) => {
+      this.activeProfile = activeProfile;
+      this.cdr.detectChanges();
+    });
+    this.profileService.onError().subscribe((errorMsg) => {
+      if (errorMsg) {
+        this.showErrorModal(errorMsg);
+      }
+    });
+
+    // profile names and active profile must be up to date before reading params
+    await this.profileService.updateProfileNames();
+    await this.profileService.updateActiveProfile();
+    this.activatedRoute.queryParams.subscribe(async (params) => {
+      if (params.profile) {
+        const response: Response = await sendAction(Action.GET_PROFILE, params.profile);
+        if (!response.error) {
+          this.profileService.selectedProfile = response.body;
+          return;
+        } else {
+          this.profileService.sendError(`Failed to fetch profile: ${response.error.message}`);
+        }
+      }
+
+      this.profileNames = this.profileService.profileNames;
+      this.activeProfile = this.profileService.activeProfile;
+      const redirectProfile = this.activeProfile?.name ?? this.profileNames[0];
+      if (redirectProfile) {
+        this.router.navigate(['.'], { queryParams: { profile: redirectProfile }});
       } else {
-        this.selectedProfileName = params.profile;
+        this.profileService.selectedProfile = undefined;
       }
     });
   }
 
-  async getProfileNames(): Promise<void> {
-    const response: Response = await sendAction(Action.GET_PROFILE_NAMES);
-    if (response.error) {
-      this.showErrorModal(`Failed to fetch profiles: ${response.error.message}`);
-      return;
-    }
-    this.profileNames = response.body;
-    this.profileNameSet = new Set(this.profileNames);
-    if (this.selectedProfileName && !this.profileNames.includes(this.selectedProfileName)) {
-      if (this.profileNames.length) {
-        this.router.navigate(['.'], { queryParams: { profile: this.profileNames[0] }});
-      } else {
-        this.router.navigate(['.']);
-      }
-    }
-  }
-
-  async getActiveProfile(): Promise<void> {
-    const response: Response = await sendAction(Action.GET_ACTIVE_PROFILE);
-    this.activeProfile = response.body;
-  }
-
   async handleAddProfile(): Promise<void> {
-    const profileName = this.newProfileName.trim();
-    if (profileName.length == 0) {
-      this.showErrorModal('New profile name cannot be empty');
-      return;
+    const trimmedName = this.newProfileName.trim();
+    if (await this.profileService.addProfile(trimmedName)) {
+      this.newProfileName = '';
+      this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
+      this.hideNewProfileModal();
+      this.cdr.detectChanges();
     }
-    if (this.profileNameSet.has(profileName)) {
-      this.showErrorModal('Profile with name already exists');
-      return;
-    }
-    const newProfile: Profile = {
-      name: profileName,
-      sites: [],
-      options: {
-        isActive: false,
-        blockMode: BlockMode.BLOCK_SITES
-      }
-    }
-    const response: Response = await sendAction(Action.ADD_PROFILE, newProfile);
-    if (response.error) {
-      this.showErrorModal(`Failed to add profile: ${response.error.message}`);
-      return;
-    }
-    this.newProfileName = '';
-    this.getProfileNames();
-    this.getActiveProfile();
-    this.router.navigate(['.'], { queryParams: { profile: profileName }});
-    this.hideNewProfileModal();
   }
 
   showNewProfileModal(): void {
@@ -105,5 +91,9 @@ export class DashboardComponent implements OnInit {
   hideErrorModal(): void {
     this.errorMsg = '';
     this.errorModalOpen = false;
+  }
+
+  getSelectedProfileName(): string | undefined {
+    return this.profileService.selectedProfile?.name;
   }
 }

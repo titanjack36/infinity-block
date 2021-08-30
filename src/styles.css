@@ -52,10 +52,27 @@ body {
   background-color: #ffffff33;
 }
 
+a.text-btn {
+  box-sizing: border-box;
+  display: block;
+  text-align: center;
+  text-decoration: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+a.text-btn:visited {
+  text-decoration: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 .textfield {
   background: none;
   border: none;
   border-bottom: 2px solid #f2f2f2;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
   color: #f2f2f2;
   background-color: #ffffff15;
   font-family: inherit;
@@ -86,6 +103,12 @@ app-modal .btn-group button:first-child {
   height: 40px;
   display: block;
   position: relative;
+  cursor: pointer;
+}
+
+.toggle-switch.small {
+  height: 25px;
+  width: 60px;
 }
 
 .toggle-switch > .slider {
@@ -96,9 +119,11 @@ app-modal .btn-group button:first-child {
   left: 0;
   right: 0;
   bottom: 0;
+
+  transition: 0.25s;
 }
 
-.toggle-switch > .slider:before {
+.toggle-switch > .slider::before {
   position: absolute;
   content: "Off";
   top: 4px;
@@ -107,6 +132,8 @@ app-modal .btn-group button:first-child {
   height: 32px;
   background-color: #ffffff;
   border-radius: 4px;
+  color: #535353;
+  font-weight: bold;
   
   display: flex;
   justify-content: center;
@@ -115,7 +142,17 @@ app-modal .btn-group button:first-child {
   transition: 0.25s;
 }
 
-.toggle-switch > input:checked + .slider:before {
+.toggle-switch.small > .slider::before {
+  width: 30px;
+  height: 17px;
+}
+
+.toggle-switch > input:checked + .slider {
+  background-color: #25c225;
+}
+
+.toggle-switch > input:checked + .slider::before {
   content: "On";
+  color: #25c225;
   transform: translateX(22px);
 }

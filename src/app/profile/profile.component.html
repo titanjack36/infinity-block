@@ -1,4 +1,4 @@
-<div id="profileWrapper" *ngIf="selectedProfile; else showPrompt">
+<div id="profileWrapper" *ngIf="selectedProfile && modifiedProfile; else showPrompt">
   <div id="profileContent">
     <div class="title-wrapper">
       <ng-container *ngIf="!isEditingName; else editName">
@@ -25,14 +25,14 @@
       </ng-template>
     </div>
     <div id="enableProfile">
+      <h2>Enable Profile</h2>
       <label class="toggle-switch">
         <input 
           type="checkbox"
-          [(ngModel)]="selectedProfile.options.isActive"
-          (change)="handleUpdateOptions()">
+          [(ngModel)]="modifiedProfile.options.isActive"
+          (change)="handleUpdateProfile()">
         <span class="slider"></span>
       </label>
-      <h2>Enable Profile</h2>
     </div>
     <h2>Site List</h2>
     <input
@@ -53,38 +53,8 @@
         </button>
       </div>
     </div>
-    
   </div>
-  <div id="profileOptions">
-    <h3 class="options-title">Options</h3>
-    <h3>Block Mode</h3>
-    <div id="blockModeSelection">
-      <input
-        type="radio"
-        id="useBlockSites"
-        [value]="BlockMode.BLOCK_SITES"
-        [(ngModel)]="selectedProfile.options.blockMode"
-        (change)="handleUpdateOptions()"
-        >
-      <label for="useBlockSites">
-        Only Block Listed Sites
-        <img src="assets/confirm-icon.svg">
-      </label>
-      <input
-        type="radio"
-        id="useAllowSites"
-        [value]="BlockMode.ALLOW_SITES"
-        [(ngModel)]="selectedProfile.options.blockMode"
-        (change)="handleUpdateOptions()"
-        >
-      <label for="useAllowSites">
-        Only Allow Listed Sites
-        <img src="assets/confirm-icon.svg">
-      </label>
-    </div>
-    <h3>Actions</h3>
-    <button id="deleteProfileBtn" class="text-btn" (click)="showConfirmDeleteModal()">Delete Profile</button>
-  </div>
+  <app-profile-options></app-profile-options>
 </div>
 <ng-template #showPrompt>
   <div id="createProfilePrompt">
@@ -95,16 +65,3 @@
     </button>
   </div>
 </ng-template>
-
-<app-modal
-  id="confirmDeleteModal"
-  [showModal]="confirmDeleteModalOpen"
-  (onHideModal)="hideConfirmDeleteModal()"
->
-  <h1>Confirm Delete</h1>
-  <p>Are you sure you want to delete <b>{{ selectedProfileName }}</b>?</p>
-  <div class="btn-group">
-    <button class="text-btn" (click)="hideConfirmDeleteModal()">No</button>
-    <button class="text-btn" (click)="handleRemoveProfile()">Yes</button>
-  </div>
-</app-modal>

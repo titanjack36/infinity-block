@@ -3,6 +3,11 @@ export enum BlockMode {
   BLOCK_SITES
 }
 
+export enum SchedEventType {
+  ENABLE,
+  DISABLE
+}
+
 export interface Profile {
   name: string;
   sites: Site[];
@@ -17,4 +22,18 @@ export interface Site {
 export interface Options {
   isActive: boolean;
   blockMode: BlockMode;
+  schedule: Schedule;
+}
+
+export interface Schedule {
+  isEnabled: boolean;
+  events: SchedEvent[];
+}
+
+export interface SchedEvent {
+  profileName: string;
+  eventType: SchedEventType;
+  time?: Date;
+  timeStr: string;
+  executed: boolean;
 }

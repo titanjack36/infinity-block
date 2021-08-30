@@ -1,0 +1,14 @@
+<div class="select">
+  <div class="window" (click)="toggleDropdown()">
+    {{ selectedOption?.description }}
+  </div>
+  <div class="dropdown" *ngIf="options && dropdownOpen">
+    <div
+      class="option"
+      *ngFor="let option of options"
+      (click)="handleSelectOption(option)"
+      >
+      {{ option.description }}
+    </div>
+  </div>
+</div>

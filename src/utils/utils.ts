@@ -1,6 +1,7 @@
 /// <reference types="chrome"/>
 
 import { Action, Request, Response } from '../models/message.interface';
+import { setHours, setMinutes } from 'date-fns';
 
 export async function sendAction(action: Action, body?: any): Promise<Response> {
   return new Promise((resolve, reject) => {
@@ -64,4 +65,25 @@ export function isValidUrl(str: string): boolean {
     '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
     '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
   return !!pattern.test(str);
+}
+
+export function parseTime(timeStr: string | undefined): Date | undefined {
+  if (!timeStr) {
+    return undefined;
+  }
+  const pattern = /^(0?[0-9]|1[0-2]):([0-5][0-9]) ?(am|pm)$/i;
+  const match = pattern.exec(timeStr);
+  if (!match || match.length < 4) {
+    return undefined;
+  }
+  let date = new Date();
+  const [hours, minutes, ampm] = match.slice(1, 4);
+  date = setHours(date, parseInt(hours) + (ampm == 'am' ? 0 : 12));
+  date = setMinutes(date, parseInt(minutes));
+  return date;
+}
+
+export function getTimeInSecs(time: Date) {
+  const date = new Date(time);
+  return date.getHours() * 60 + date.getSeconds();
 }
