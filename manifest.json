@@ -17,17 +17,7 @@
       "background.js"
     ]
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "*://*/*"
-      ],
-      "run_at": "document_end",
-      "js": [
-        "content.js"
-      ]
-    }
-  ],
+  "content_scripts": [],
   "permissions": [
     "activeTab",
     "tabs",

@@ -143,3 +143,24 @@
 #enableProfile .toggle-switch {
   font-size: 15px;
 }
+
+.site-action-group {
+  display: flex;
+}
+
+.regex-toggle {
+  margin-right: 10px;
+}
+
+.regex-toggle > img {
+  width: 25px;
+}
+
+.regex-toggle input:checked+img {
+  background-image: url("../../assets/regex-enabled.svg");
+}
+
+.regex-toggle > input {
+  display: none;
+}
+

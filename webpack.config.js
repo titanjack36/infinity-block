@@ -5,8 +5,7 @@ const appName = "infinity-block";
 
 module.exports = {
   entry: {
-    'background': './src/core/background.ts',
-    'content': './src/core/content.ts'
+    'background': './src/core/background.ts'
   },
   output: {
     filename: '[name].js',

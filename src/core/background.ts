@@ -9,19 +9,24 @@ var profiles: Profile[] = [];
 var activeProfile: Profile | undefined;
 var blockedTabIdMap: Map<number, string> = new Map();
 var pendingSchedEvents: SchedEvent[] = [];
-var prevSavedDate: Date = new Date();
+var prevSavedDate: Date | undefined = undefined;
 
-chrome.storage.local.get(['profiles'], result => {
+chrome.storage.local.get(['profiles', 'prevSavedDate'], result => {
   if (!result) {
     return;
   }
   if (result.profiles) {
-   profiles = result.profiles;
-   activeProfile = profiles.find(profile => profile.options.isActive);
+    profiles = result.profiles;
+    activeProfile = profiles.find(profile => profile.options.isActive);
   }
   if (result.prevSavedDate) {
-    prevSavedDate = new Date(result.prevSavedDate);
+    prevSavedDate = new Date(JSON.parse(result.prevSavedDate));
+  } else {
+    prevSavedDate = new Date();
   }
+
+  checkIfNewDay();
+  checkSchedEvents();
 });
 
 receiveMessage(async (request: Request, sender): Promise<any> => {
@@ -33,19 +38,6 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
   let profileIdx: number | undefined;
 
   switch(request.action) {
-    case Action.ON_TAB_UPDATE:
-      if (!activeProfile) {
-        break;
-      }
-      if (!sender.tab?.id) {
-        throw new Error('Sender tab ID is undefined');
-      }
-      const matchedTab = await matchTabSiteWithProfile(sender.tab.id, activeProfile);
-      if (matchedTab) {
-        redirectTab(matchedTab);
-      }
-      break;
-
     case Action.UPDATE_PROFILE:
       const profile: Profile | undefined = request.body.profile;
       if (!profile) {
@@ -123,6 +115,19 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
   return responseBody;
 });
 
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (!(changeInfo.url && activeProfile && tabId && tab)) {
+    return;
+  }
+  if (isSiteBlocked(changeInfo.url, activeProfile)) {
+    try {
+      redirectTab(tab);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+});
+
 function getProfileIndexFromName(profileName: string | undefined): number {
   if (!profileName) {
     throw new Error('Profile name is undefined');
@@ -147,7 +152,7 @@ async function matchAllTabsWithProfile(profile: Profile): Promise<(chrome.tabs.T
   const matchedTabPromises: Promise<chrome.tabs.Tab | undefined>[] = [];
   tabs.forEach(tab => matchedTabPromises.push(matchTabSiteWithProfile(tab.id!, profile)));
   return (await Promise.all(matchedTabPromises))
-    .filter(tab => tab && (tab.url?.includes("http://") || tab.url?.includes("https://"))) as chrome.tabs.Tab[];
+    .filter(tab => tab) as chrome.tabs.Tab[];
 }
 
 async function restoreBlockedTabs(profile?: Profile) {
@@ -165,7 +170,17 @@ async function restoreBlockedTabs(profile?: Profile) {
 }
 
 function isSiteBlocked(siteUrl: string, profile: Profile): boolean {
-  const matchedSite: Site | undefined = profile.sites.find(site => siteUrl.includes(site.url));
+  if (!(siteUrl.includes('http://') || siteUrl.includes('https://'))) {
+    return false;
+  }
+  const matchedSite: Site | undefined = profile.sites.find(site => {
+    if (site.useRegex) {
+      const urlRegex = new RegExp(site.url);
+      return urlRegex.test(siteUrl);
+    } else {
+      return siteUrl.includes(site.url);
+    }
+  });
   const blockMode = profile.options.blockMode;
   return (matchedSite && blockMode === BlockMode.BLOCK_SITES)
     || (!matchedSite && blockMode === BlockMode.ALLOW_SITES);
@@ -212,7 +227,7 @@ function updatePendingSchedEvents(): void {
 async function checkSchedEvents(): Promise<void> {
   const remainingEvents = [];
   for (const event of pendingSchedEvents) {
-    if (getTimeInSecs(event.time!) > getTimeInSecs(new Date())) {
+    if (getTimeInSecs(event.time!) < getTimeInSecs(new Date())) {
       try {
         if (event.eventType == SchedEventType.ENABLE) {
           await setActiveProfile(event.profileName);
@@ -222,33 +237,41 @@ async function checkSchedEvents(): Promise<void> {
           activeProfile = undefined;
           restoreBlockedTabs();
         }
+        saveProfiles();
       } catch (err) {
         console.error(err);
       }
+      event.executed = true;
     } else {
       remainingEvents.push(event);
     }
   }
   if (remainingEvents.length != pendingSchedEvents.length) {
     pendingSchedEvents = remainingEvents;
-    sendAction(Action.NOTIFY_SCHEDULE_TRIGGER);
+    sendAction(Action.NOTIFY_SCHEDULE_TRIGGER).catch((err) => { });
   }
 }
 
-setInterval(() => {
-  checkSchedEvents();
-
+function checkIfNewDay() {
+  if (!prevSavedDate) {
+    return;
+  }
   // reset all events if new day
   const newDate = new Date();
   if (!isSameDay(prevSavedDate, newDate)) {
-    pendingSchedEvents = [];
     profiles.forEach(profile => {
       profile.options.schedule.events.forEach(event => {
         event.executed = false;
       });
     });
+    saveProfiles();
     updatePendingSchedEvents();
   }
   prevSavedDate = newDate;
-  chrome.storage.local.set({ prevSavedDate }, () => {});
+  chrome.storage.local.set({ prevSavedDate: JSON.stringify(prevSavedDate) }, () => {});
+}
+
+setInterval(() => {
+  checkIfNewDay();
+  checkSchedEvents();
 }, 5000);

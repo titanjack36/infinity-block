@@ -138,15 +138,15 @@ export class ProfileService {
       this.error.next('New site URL cannot be empty');
       return false;
     }
-    if (!isValidUrl(siteUrl)) {
-      this.error.next('New site URL is invalid');
-      return false;
-    }
+    // if (!isValidUrl(siteUrl)) {
+    //   this.error.next('New site URL is invalid');
+    //   return false;
+    // }
     if (this.siteUrlSet.has(siteUrl)) {
       this.error.next('Site with URL already exists');
       return false;
     }
-    modifiedProfile.sites.push({ url: siteUrl });
+    modifiedProfile.sites.push({ url: siteUrl, useRegex: false });
     return this.updateProfile(modifiedProfile);
   }
 
@@ -206,6 +206,7 @@ export class ProfileService {
       this.error.next(`Failed to update scheduled events: ${response.error.message}`);
       return false;
     }
+    this.selectedProfile = response.body
     return true;
   }
 }

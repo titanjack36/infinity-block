@@ -85,5 +85,5 @@ export function parseTime(timeStr: string | undefined): Date | undefined {
 
 export function getTimeInSecs(time: Date) {
   const date = new Date(time);
-  return date.getHours() * 60 + date.getSeconds();
+  return date.getHours() * 3600 + date.getMinutes() * 60;
 }

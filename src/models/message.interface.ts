@@ -1,5 +1,4 @@
 export enum Action {
-  ON_TAB_UPDATE,
   UPDATE_PROFILE,
   GET_PROFILE_NAMES,
   ADD_PROFILE,

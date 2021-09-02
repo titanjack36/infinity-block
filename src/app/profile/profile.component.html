@@ -46,11 +46,19 @@
     <button class="text-btn" (click)="handleAddSite()">Add Site</button>
     
     <div id="siteList">
-      <div *ngFor="let site of selectedProfile.sites; let idx = index">
+      <div *ngFor="let site of modifiedProfile.sites; let idx = index">
         <div>{{ site.url }}</div>
-        <button class="remove-site-btn icon-btn" (click)="handleRemoveSite(idx)">
-          <img src="assets/close.svg" alt="Remove Site">
-        </button>
+        <div class="site-action-group">
+          <label class="regex-toggle icon-btn">
+            <img 
+              [src]="site.useRegex ? 'assets/regex-enabled.svg' : 'assets/regex-disabled.svg'"
+              [alt]="site.useRegex ? 'Disable Regex' : 'Enable Regex'">
+            <input type="checkbox" [(ngModel)]="site.useRegex" (change)="handleUpdateProfile()">
+          </label>
+          <button class="remove-site-btn icon-btn" (click)="handleRemoveSite(idx)">
+            <img src="assets/close.svg" alt="Remove Site">
+          </button>
+        </div>
       </div>
     </div>
   </div>
