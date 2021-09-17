@@ -24,7 +24,7 @@ export function receiveMessage(handler: (request: Request, sender: chrome.runtim
         sendResponse(response)
       })
       .catch(err => {
-        console.log(err);
+        console.error(err);
         response.error = { message: err.message };
         sendResponse(response);
       });

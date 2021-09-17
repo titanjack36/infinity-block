@@ -123,7 +123,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     try {
       redirectTab(tab);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 });
@@ -194,7 +194,9 @@ function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl): vo
     throw new Error('Tab URL is undefined');
   }
   blockedTabIdMap.set(tab.id, tab.url);
-  chrome.tabs.update(tab.id, { url: redirectUrl });
+  chrome.tabs.update(tab.id, {
+    url: `${redirectUrl}?url=${encodeURIComponent(tab.url)}`
+  });
 }
 
 async function setActiveProfile(profileName: string): Promise<void> {
@@ -237,7 +239,6 @@ async function checkSchedEvents(): Promise<void> {
           activeProfile = undefined;
           restoreBlockedTabs();
         }
-        saveProfiles();
       } catch (err) {
         console.error(err);
       }
@@ -249,6 +250,7 @@ async function checkSchedEvents(): Promise<void> {
   if (remainingEvents.length != pendingSchedEvents.length) {
     pendingSchedEvents = remainingEvents;
     sendAction(Action.NOTIFY_SCHEDULE_TRIGGER).catch((err) => { });
+    saveProfiles();
   }
 }
 

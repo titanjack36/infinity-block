@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-block-page',
@@ -7,9 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class BlockPageComponent implements OnInit {
 
-  constructor() { }
+  blockedUrl: string | undefined;
 
-  ngOnInit(): void {
+  constructor(private activatedRoute: ActivatedRoute) { 
   }
 
+  ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe(async (params) => {
+      this.blockedUrl = params.url;
+    });
+  }
 }

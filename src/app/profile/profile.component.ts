@@ -28,8 +28,12 @@ export class ProfileComponent implements OnInit {
       if (!this.selectedProfile || !this.modifiedProfile) {
         return;
       }
-      this.selectedProfile.options.isActive = activeProfile?.name == this.selectedProfile.name;
-      this.modifiedProfile.options.isActive = this.selectedProfile.options.isActive;
+      if (activeProfile?.name == this.selectedProfile.name) {
+        this.selectedProfile.options.isActive = true;
+        this.modifiedProfile.options.isActive = true;
+        this.selectedProfile.options.schedule = activeProfile.options.schedule;
+      }
+
       this.cdr.detectChanges();
     });
 

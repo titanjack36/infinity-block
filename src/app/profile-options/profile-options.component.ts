@@ -32,6 +32,15 @@ export class ProfileOptionsComponent implements OnInit {
     private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
+    this.profileService.onActiveProfileUpdated().subscribe((activeProfile) => {
+      if (!this.selectedProfile || !this.modifiedProfile) {
+        return;
+      }
+      if (activeProfile?.name == this.selectedProfile?.name) {
+        this.selectedProfile.options.schedule = activeProfile.options.schedule;
+        this.updateExportHref();
+      }
+    });
     this.profileService.onProfileUpdated().subscribe((profile) => {
       this.selectedProfile = profile;
       this.updateExportHref();

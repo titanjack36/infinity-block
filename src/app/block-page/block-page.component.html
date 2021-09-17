@@ -1,1 +1,7 @@
-<h1>Page Blocked.</h1>
+<ng-container *ngIf="blockedUrl; else noUrl">
+  <div class="url">{{ blockedUrl }}</div>
+  <div class="text">has been blocked.</div>
+</ng-container>
+<ng-template #noUrl>
+  <div class="text">The page you were viewing has been blocked.</div>
+</ng-template>
