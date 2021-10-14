@@ -18,8 +18,8 @@ chrome.storage.local.get(['profiles', 'prevSavedDate'], result => {
   }
   if (result.profiles) {
     profiles = result.profiles;
-    // activeProfiles = profiles.filter(profile => profile.options.isActive);
-    // activeProfiles = new ActiveProfiles([]);
+    activeProfiles = new ActiveProfiles(
+      profiles.filter(profile => profile.options.isActive));
   }
   if (result.prevSavedDate) {
     prevSavedDate = new Date(JSON.parse(result.prevSavedDate));
@@ -47,7 +47,7 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
       }
       profileIdx = getProfileIndexFromName(request.body?.profileName);
       profiles[profileIdx] = profile;
-      if (!activeProfiles.hasName(request.body.profileName)) {
+      if (activeProfiles.hasName(request.body.profileName)) {
         activeProfiles.removeWithName(request.body.profileName);
       }
       if (profile.options.isActive) {

@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { BlockMode, Profile, SchedEvent, Site } from '../models/profile.interface';
 import { isValidUrl, receiveMessage, sendAction } from '../utils/utils';
 import { Action, Response, Request } from '../models/message.interface';
-import ActiveProfiles from 'src/models/active-profile';
+import ActiveProfiles from '../models/active-profile';
 
 @Injectable({
   providedIn: 'root'
@@ -104,7 +104,7 @@ export class ProfileService {
 
   async updateActiveProfiles(): Promise<void> {
     const response: Response = await sendAction(Action.GET_ACTIVE_PROFILES);
-    this.activeProfiles = response.body;
+    this.activeProfiles = new ActiveProfiles(response.body);
   }
   
   async addProfile(profileName: string): Promise<boolean> {

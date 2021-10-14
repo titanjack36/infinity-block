@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import ActiveProfiles from 'src/models/active-profile';
+import ActiveProfiles from '../../models/active-profile';
 import { Action, Response } from '../../models/message.interface';
 import { BlockMode, Profile } from '../../models/profile.interface';
 import { sendAction } from '../../utils/utils';

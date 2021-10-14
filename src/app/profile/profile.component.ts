@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Profile } from 'src/models/profile.interface';
+import { Profile } from '../../models/profile.interface';
 import { ProfileService } from '../profile.service';
 
 @Component({
