@@ -160,7 +160,7 @@ async function restoreBlockedTabs() {
       try {
         const tab = await getTab(tabId);
         if (tab.url?.includes("chrome-extension://")) {
-          redirectTab(tab, siteUrl);
+          redirectTab(tab, siteUrl, false);
         }
       } catch { }
       blockedTabIdMap.delete(tabId);
@@ -194,7 +194,8 @@ function isSiteBlocked(siteUrl: string): boolean {
     || (!matched && blockMode === BlockMode.ALLOW_SITES);
 }
 
-function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl): void {
+function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl, 
+    includeOrigUrl = true): void {
   if (!tab.id) {
     throw new Error('Tab ID is undefined');
   }
@@ -202,9 +203,8 @@ function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl): vo
     throw new Error('Tab URL is undefined');
   }
   blockedTabIdMap.set(tab.id, tab.url);
-  chrome.tabs.update(tab.id, {
-    url: `${redirectUrl}?url=${encodeURIComponent(tab.url)}`
-  });
+  const params = includeOrigUrl ? `?url=${encodeURIComponent(tab.url)}` : '';
+  chrome.tabs.update(tab.id, { url: `${redirectUrl}${params}` }, );
 }
 
 function saveProfiles(): void {

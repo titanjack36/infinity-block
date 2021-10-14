@@ -28,7 +28,8 @@ import { ProfileOptionsComponent } from './profile-options/profile-options.compo
     FormsModule
   ],
   providers: [
-    { provide: LocationStrategy, useClass: HashLocationStrategy }
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
+    { provide: Window, useValue: window }
   ],
   bootstrap: [AppComponent]
 })

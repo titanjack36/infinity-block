@@ -10,12 +10,18 @@ export class BlockPageComponent implements OnInit {
 
   blockedUrl: string | undefined;
 
-  constructor(private activatedRoute: ActivatedRoute) { 
+  constructor(
+    private activatedRoute: ActivatedRoute, 
+    private window: Window) { 
   }
 
   ngOnInit(): void {
     this.activatedRoute.queryParams.subscribe(async (params) => {
       this.blockedUrl = params.url;
     });
+  }
+
+  handleGoBack() {
+    this.window.history.go(-2);
   }
 }
