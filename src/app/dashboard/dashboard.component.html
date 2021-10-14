@@ -10,7 +10,7 @@
   >
     <span 
       class="statusCircle"
-      [class.active]="profileName === activeProfile?.name">
+      [class.active]="activeProfiles.hasName(profileName)">
     </span>
     {{ profileName }}
   </a>

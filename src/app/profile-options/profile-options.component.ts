@@ -32,12 +32,13 @@ export class ProfileOptionsComponent implements OnInit {
     private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
-    this.profileService.onActiveProfileUpdated().subscribe((activeProfile) => {
+    this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
       if (!this.selectedProfile || !this.modifiedProfile) {
         return;
       }
-      if (activeProfile?.name == this.selectedProfile?.name) {
-        this.selectedProfile.options.schedule = activeProfile.options.schedule;
+      const updatedProfile = activeProfiles.find(this.selectedProfile.name);
+      if (updatedProfile) {
+        this.selectedProfile.options.schedule = updatedProfile.options.schedule;
         this.updateExportHref();
       }
     });
@@ -140,7 +141,7 @@ export class ProfileOptionsComponent implements OnInit {
       const sites = JSON.parse(content);
       this.modifiedProfile!.sites = sites;
       this.handleUpdateProfile();
-    } catch (err) {
+    } catch (err: any) {
       this.profileService.sendError(`Failed to parse file: ${err.message}`);
     }
   }

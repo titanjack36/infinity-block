@@ -2,11 +2,12 @@ import { BlockMode, Profile, SchedEvent, SchedEventType, Site } from '../models/
 import { Action, Request } from '../models/message.interface';
 import { getAllTabs, getTab, getTimeInSecs, receiveMessage, sendAction } from '../utils/utils';
 import { isSameDay } from 'date-fns';
+import ActiveProfiles from '../models/active-profile';
 
 const defaultRedirectUrl: string = `${chrome.extension.getURL('app/index.html')}#/block`
 
 var profiles: Profile[] = [];
-var activeProfile: Profile | undefined;
+var activeProfiles: ActiveProfiles = new ActiveProfiles();
 var blockedTabIdMap: Map<number, string> = new Map();
 var pendingSchedEvents: SchedEvent[] = [];
 var prevSavedDate: Date | undefined = undefined;
@@ -17,7 +18,8 @@ chrome.storage.local.get(['profiles', 'prevSavedDate'], result => {
   }
   if (result.profiles) {
     profiles = result.profiles;
-    activeProfile = profiles.find(profile => profile.options.isActive);
+    // activeProfiles = profiles.filter(profile => profile.options.isActive);
+    // activeProfiles = new ActiveProfiles([]);
   }
   if (result.prevSavedDate) {
     prevSavedDate = new Date(JSON.parse(result.prevSavedDate));
@@ -45,12 +47,14 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
       }
       profileIdx = getProfileIndexFromName(request.body?.profileName);
       profiles[profileIdx] = profile;
-      if (profile.options.isActive) {
-        await setActiveProfile(profile.name);
-      } else if (activeProfile?.name == request.body.profileName) {
-        activeProfile = undefined;
-        restoreBlockedTabs(activeProfile);
+      if (!activeProfiles.hasName(request.body.profileName)) {
+        activeProfiles.removeWithName(request.body.profileName);
       }
+      if (profile.options.isActive) {
+        activeProfiles.add(profile);
+      }
+      restoreBlockedTabs();
+      blockTabsMatchingActive();
       updatePendingSchedEvents();
       saveProfiles();
       break;
@@ -108,18 +112,18 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
       saveProfiles();
       break;
 
-    case Action.GET_ACTIVE_PROFILE:
-      responseBody = activeProfile;
+    case Action.GET_ACTIVE_PROFILES:
+      responseBody = activeProfiles.getList();
       break;
   }
   return responseBody;
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (!(changeInfo.url && activeProfile && tabId && tab)) {
+  if (activeProfiles.isEmpty() || !(changeInfo.url && tabId && tab)) {
     return;
   }
-  if (isSiteBlocked(changeInfo.url, activeProfile)) {
+  if (isSiteBlocked(changeInfo.url)) {
     try {
       redirectTab(tab);
     } catch (err) {
@@ -128,36 +132,31 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
-function getProfileIndexFromName(profileName: string | undefined): number {
+function getProfile(profileName: string): Profile {
+  const profileIdx = getProfileIndexFromName(profileName);
+  return profiles[profileIdx];
+}
+
+function getProfileIndexFromName(profileName: string): number {
   if (!profileName) {
-    throw new Error('Profile name is undefined');
+    throw new Error('Profile name is not specified');
   }
   const targetProfileIdx = profiles.findIndex(profile => profile.name == profileName);
-  if (targetProfileIdx == -1) {
+  if (targetProfileIdx === -1) {
     throw new Error(`Could not find profile with name "${profileName}"`);
   }
   return targetProfileIdx;
 }
 
-async function matchTabSiteWithProfile(tabId: number, profile: Profile): Promise<chrome.tabs.Tab | undefined> {
-  const tab = await getTab(tabId);
-  if (!tab.url) {
-    throw new Error('Failed to get sender tab URL');
-  }
-  return isSiteBlocked(tab.url, profile) ? tab : undefined;
-}
-
-async function matchAllTabsWithProfile(profile: Profile): Promise<(chrome.tabs.Tab)[]> {
+async function blockTabsMatchingActive(): Promise<void> {
   const tabs = await getAllTabs();
-  const matchedTabPromises: Promise<chrome.tabs.Tab | undefined>[] = [];
-  tabs.forEach(tab => matchedTabPromises.push(matchTabSiteWithProfile(tab.id!, profile)));
-  return (await Promise.all(matchedTabPromises))
-    .filter(tab => tab) as chrome.tabs.Tab[];
+  const matchedTabs = tabs.filter(tab => isSiteBlocked(tab.url!));
+  matchedTabs.forEach(tab => redirectTab(tab));
 }
 
-async function restoreBlockedTabs(profile?: Profile) {
+async function restoreBlockedTabs() {
   for (const [tabId, siteUrl] of blockedTabIdMap) {
-    if (!profile || !isSiteBlocked(siteUrl, profile)) {
+    if (!isSiteBlocked(siteUrl)) {
       try {
         const tab = await getTab(tabId);
         if (tab.url?.includes("chrome-extension://")) {
@@ -169,21 +168,30 @@ async function restoreBlockedTabs(profile?: Profile) {
   }
 }
 
-function isSiteBlocked(siteUrl: string, profile: Profile): boolean {
+function isSiteBlocked(siteUrl: string): boolean {
+  if (activeProfiles.isEmpty()) {
+    return false;
+  }
   if (!(siteUrl.includes('http://') || siteUrl.includes('https://'))) {
     return false;
   }
-  const matchedSite: Site | undefined = profile.sites.find(site => {
-    if (site.useRegex) {
-      const urlRegex = new RegExp(site.url);
-      return urlRegex.test(siteUrl);
-    } else {
-      return siteUrl.includes(site.url);
+  let matched: boolean = false;
+  for (const profile of activeProfiles.getList()) {
+    matched = !!profile.sites.find(site => {
+      if (site.useRegex) {
+        const urlRegex = new RegExp(site.url);
+        return urlRegex.test(siteUrl);
+      } else {
+        return siteUrl.includes(site.url);
+      }
+    });
+    if (matched) {
+      break;
     }
-  });
-  const blockMode = profile.options.blockMode;
-  return (matchedSite && blockMode === BlockMode.BLOCK_SITES)
-    || (!matchedSite && blockMode === BlockMode.ALLOW_SITES);
+  }
+  const blockMode = activeProfiles.getActiveMode();
+  return (matched && blockMode === BlockMode.BLOCK_SITES)
+    || (!matched && blockMode === BlockMode.ALLOW_SITES);
 }
 
 function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl): void {
@@ -197,19 +205,6 @@ function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl): vo
   chrome.tabs.update(tab.id, {
     url: `${redirectUrl}?url=${encodeURIComponent(tab.url)}`
   });
-}
-
-async function setActiveProfile(profileName: string): Promise<void> {
-  const profileIdx = getProfileIndexFromName(profileName);
-  const profile = profiles[profileIdx];
-  profile.options.isActive = true;
-  if (activeProfile && activeProfile.name != profile.name) {
-    activeProfile.options.isActive = false;
-  }
-  activeProfile = profile;
-  const matchedTabs = await matchAllTabsWithProfile(activeProfile);
-  matchedTabs.forEach(tab => redirectTab(tab));
-  restoreBlockedTabs(activeProfile);
 }
 
 function saveProfiles(): void {
@@ -231,12 +226,13 @@ async function checkSchedEvents(): Promise<void> {
   for (const event of pendingSchedEvents) {
     if (getTimeInSecs(event.time!) < getTimeInSecs(new Date())) {
       try {
-        if (event.eventType == SchedEventType.ENABLE) {
-          await setActiveProfile(event.profileName);
-        } else if (event.profileName == activeProfile?.name) {
-          const profileIdx = getProfileIndexFromName(event.profileName);
-          profiles[profileIdx].options.isActive = false;
-          activeProfile = undefined;
+        if (event.eventType === SchedEventType.ENABLE) {
+          activeProfiles.add(getProfile(event.profileName));
+          restoreBlockedTabs();
+          blockTabsMatchingActive();
+        } else if (activeProfiles.hasName(event.profileName)) {
+          const profile = activeProfiles.removeWithName(event.profileName)!;
+          profile.options.isActive = false;
           restoreBlockedTabs();
         }
       } catch (err) {
@@ -247,7 +243,7 @@ async function checkSchedEvents(): Promise<void> {
       remainingEvents.push(event);
     }
   }
-  if (remainingEvents.length != pendingSchedEvents.length) {
+  if (remainingEvents.length !== pendingSchedEvents.length) {
     pendingSchedEvents = remainingEvents;
     sendAction(Action.NOTIFY_SCHEDULE_TRIGGER).catch((err) => { });
     saveProfiles();

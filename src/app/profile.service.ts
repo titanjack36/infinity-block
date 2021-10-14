@@ -3,26 +3,30 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { BlockMode, Profile, SchedEvent, Site } from '../models/profile.interface';
 import { isValidUrl, receiveMessage, sendAction } from '../utils/utils';
 import { Action, Response, Request } from '../models/message.interface';
+import ActiveProfiles from 'src/models/active-profile';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
 
-  private profileUpdated: BehaviorSubject<Profile | undefined> = new BehaviorSubject<Profile | undefined>(undefined);
-  private activeProfileUpdated: BehaviorSubject<Profile | undefined> = new BehaviorSubject<Profile | undefined>(undefined);
-  private profileNamesUpdated: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+  private profileUpdated: BehaviorSubject<Profile | undefined> = 
+    new BehaviorSubject<Profile | undefined>(undefined);
+  private activeProfilesUpdated: BehaviorSubject<ActiveProfiles> = 
+    new BehaviorSubject<ActiveProfiles>(new ActiveProfiles());
+  private profileNamesUpdated: BehaviorSubject<string[]> = 
+    new BehaviorSubject<string[]>([]);
   private error: BehaviorSubject<string> = new BehaviorSubject('');
 
   private profileNameSet: Set<string> = new Set();
   private siteUrlSet: Set<string> = new Set();
   private _profileNames: string[] = [];
   private _selectedProfile: Profile | undefined;
-  private _activeProfile: Profile | undefined;
+  private _activeProfiles: ActiveProfiles = new ActiveProfiles();
 
   constructor() {
     this.updateProfileNames();
-    this.updateActiveProfile();
+    this.updateActiveProfiles();
 
     receiveMessage(async (request: Request, sender): Promise<any> => {
       const responseBody = {};
@@ -32,7 +36,7 @@ export class ProfileService {
 
       switch(request.action) {
         case Action.NOTIFY_SCHEDULE_TRIGGER:
-          this.updateActiveProfile();
+          this.updateActiveProfiles();
           break;
       }
 
@@ -48,8 +52,8 @@ export class ProfileService {
     return this.profileUpdated.asObservable();
   }
 
-  onActiveProfileUpdated(): Observable<Profile | undefined> {
-    return this.activeProfileUpdated.asObservable();
+  onActiveProfilesUpdated(): Observable<ActiveProfiles> {
+    return this.activeProfilesUpdated.asObservable();
   }
 
   onError(): Observable<string> {
@@ -79,13 +83,13 @@ export class ProfileService {
     this.profileNamesUpdated.next(profileNames);
   }
 
-  get activeProfile(): Profile | undefined {
-    return this._activeProfile;
+  get activeProfiles(): ActiveProfiles {
+    return this._activeProfiles;
   }
 
-  set activeProfile(activeProfile: Profile | undefined) {
-    this._activeProfile = activeProfile;
-    this.activeProfileUpdated.next(activeProfile);
+  set activeProfiles(activeProfiles: ActiveProfiles) {
+    this._activeProfiles = activeProfiles;
+    this.activeProfilesUpdated.next(activeProfiles);
   }
 
   async updateProfileNames(): Promise<void> {
@@ -98,9 +102,9 @@ export class ProfileService {
     this.profileNameSet = new Set(this.profileNames);
   }
 
-  async updateActiveProfile(): Promise<void> {
-    const response: Response = await sendAction(Action.GET_ACTIVE_PROFILE);
-    this.activeProfile = response.body;
+  async updateActiveProfiles(): Promise<void> {
+    const response: Response = await sendAction(Action.GET_ACTIVE_PROFILES);
+    this.activeProfiles = response.body;
   }
   
   async addProfile(profileName: string): Promise<boolean> {
@@ -129,7 +133,7 @@ export class ProfileService {
       this.error.next(`Failed to add profile: ${response.error.message}`);
       return false;
     }
-    await Promise.all([this.updateProfileNames(), this.updateActiveProfile()]);
+    await Promise.all([this.updateProfileNames(), this.updateActiveProfiles()]);
     return true;
   }
 
@@ -165,7 +169,7 @@ export class ProfileService {
       return false;
     }
     this.selectedProfile = modifiedProfile;
-    await Promise.all([this.updateProfileNames(), this.updateActiveProfile()]);
+    await Promise.all([this.updateProfileNames(), this.updateActiveProfiles()]);
     return true;
   }
 
@@ -184,7 +188,7 @@ export class ProfileService {
       this.error.next(`Failed to update profile name: ${response.error}`);
       return false;
     }
-    await Promise.all([this.updateProfileNames(), this.updateActiveProfile()]);
+    await Promise.all([this.updateProfileNames(), this.updateActiveProfiles()]);
     return true;
   }
 
@@ -194,7 +198,7 @@ export class ProfileService {
       this.error.next(`Failed to remove profile: ${response.error.message}`);
       return false;
     }
-    await Promise.all([this.updateProfileNames(), this.updateActiveProfile()]);
+    await Promise.all([this.updateProfileNames(), this.updateActiveProfiles()]);
     return true;
   }
 

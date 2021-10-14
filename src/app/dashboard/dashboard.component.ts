@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import ActiveProfiles from 'src/models/active-profile';
 import { Action, Response } from '../../models/message.interface';
 import { BlockMode, Profile } from '../../models/profile.interface';
 import { sendAction } from '../../utils/utils';
@@ -14,7 +15,7 @@ export class DashboardComponent implements OnInit {
 
   profileNames: string[] = [];
   newProfileName: string = '';
-  activeProfile: Profile | undefined;
+  activeProfiles: ActiveProfiles = new ActiveProfiles();
   errorMsg: string = '';
   newProfileModalOpen: boolean = false;
   errorModalOpen: boolean = false;
@@ -30,8 +31,8 @@ export class DashboardComponent implements OnInit {
     this.profileService.onProfileNamesUpdated().subscribe((profileNames) => {
       this.profileNames = profileNames;
     });
-    this.profileService.onActiveProfileUpdated().subscribe((activeProfile) => {
-      this.activeProfile = activeProfile;
+    this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
+      this.activeProfiles = activeProfiles;
       this.cdr.detectChanges();
     });
     this.profileService.onError().subscribe((errorMsg) => {
@@ -42,7 +43,7 @@ export class DashboardComponent implements OnInit {
 
     // profile names and active profile must be up to date before reading params
     await this.profileService.updateProfileNames();
-    await this.profileService.updateActiveProfile();
+    await this.profileService.updateActiveProfiles();
     this.activatedRoute.queryParams.subscribe(async (params) => {
       if (params.profile) {
         const response: Response = await sendAction(Action.GET_PROFILE, params.profile);
@@ -55,8 +56,8 @@ export class DashboardComponent implements OnInit {
       }
 
       this.profileNames = this.profileService.profileNames;
-      this.activeProfile = this.profileService.activeProfile;
-      const redirectProfile = this.activeProfile?.name ?? this.profileNames[0];
+      this.activeProfiles = this.profileService.activeProfiles;
+      const redirectProfile = this.activeProfiles.last()?.name ?? this.profileNames[0];
       if (redirectProfile) {
         this.router.navigate(['.'], { queryParams: { profile: redirectProfile }});
       } else {

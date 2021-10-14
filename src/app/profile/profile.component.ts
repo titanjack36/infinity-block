@@ -24,17 +24,17 @@ export class ProfileComponent implements OnInit {
     private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.profileService.onActiveProfileUpdated().subscribe((activeProfile) => {
+    this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
       if (!this.selectedProfile || !this.modifiedProfile) {
         return;
       }
-      if (activeProfile?.name == this.selectedProfile.name) {
+      const updatedProfile = activeProfiles.find(this.selectedProfile.name);
+      if (updatedProfile) {
         this.selectedProfile.options.isActive = true;
         this.modifiedProfile.options.isActive = true;
-        this.selectedProfile.options.schedule = activeProfile.options.schedule;
+        this.selectedProfile.options.schedule = updatedProfile.options.schedule;
+        this.cdr.detectChanges();
       }
-
-      this.cdr.detectChanges();
     });
 
     this.profileService.onProfileUpdated().subscribe((profile) => {
