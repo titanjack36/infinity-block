@@ -24,6 +24,7 @@ export interface Options {
   isActive: boolean;
   blockMode: BlockMode;
   schedule: Schedule;
+  challenge: Challenge;
 }
 
 export interface Schedule {
@@ -37,4 +38,9 @@ export interface SchedEvent {
   time?: Date;
   timeStr: string;
   executed: boolean;
+}
+
+export interface Challenge {
+  waitTimeEnabled: boolean;
+  waitTime: number;
 }

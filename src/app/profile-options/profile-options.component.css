@@ -44,13 +44,13 @@
   visibility: visible;
 }
 
-#scheduleTitle {
+.title-with-toggle {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-#scheduleTitle .toggle-switch {
+.title-with-toggle .toggle-switch {
   font-size: 13px;
 }
 
@@ -130,4 +130,11 @@ app-select-menu {
   display: flex;
   justify-content: center;
   cursor: pointer;
+}
+
+.wait-time-input {
+  font-size: 15px;
+  padding: 10px;
+  width: 30px;
+  margin: 0 10px 0 10px;
 }

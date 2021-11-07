@@ -125,6 +125,10 @@ export class ProfileService {
         schedule: {
           isEnabled: false,
           events: []
+        },
+        challenge: {
+          waitTimeEnabled: false,
+          waitTime: 30
         }
       }
     }
@@ -210,7 +214,6 @@ export class ProfileService {
       this.error.next(`Failed to update scheduled events: ${response.error.message}`);
       return false;
     }
-    this.selectedProfile = response.body
     return true;
   }
 }

@@ -3,7 +3,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import format from 'date-fns/format';
 import { getTimeInSecs, parseTime } from 'src/utils/utils';
-import { BlockMode, Profile, SchedEventType, Schedule } from '../../models/profile.interface';
+import { BlockMode, Challenge, Profile, SchedEventType, Schedule } from '../../models/profile.interface';
 import { ProfileService } from '../profile.service';
 import { Option} from '../select-menu/select-menu.component';
 
@@ -20,6 +20,7 @@ export class ProfileOptionsComponent implements OnInit {
   exportHref: SafeUrl = '';
 
   schedule: Schedule | undefined;
+  challenge: Challenge | undefined;
   eventErrors: string[] = [];
   schedEventTypeOptions: Option[] = [
     { value: SchedEventType.ENABLE, description: 'Enable' },
@@ -50,6 +51,7 @@ export class ProfileOptionsComponent implements OnInit {
       if (this.schedule) {
         this.eventErrors = new Array(this.schedule.events.length).fill('');
       }
+      this.challenge = this.modifiedProfile?.options.challenge;
     });
   }
 
