@@ -48,6 +48,7 @@ export default class ActiveProfiles {
       this.activeProfiles = [];
       this.activeMode = profile.options.blockMode;
     }
+    profile.options.isActive = true;
     this.activeProfiles.push(profile);
   }
 
