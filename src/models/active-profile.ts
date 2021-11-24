@@ -44,6 +44,12 @@ export default class ActiveProfiles {
       return;
     }
     if (this.activeMode !== profile.options.blockMode) {
+      const activeWithChallenge = 
+        !!this.activeProfiles.find(p => p.options.challenge.waitTimeEnabled);
+      if (activeWithChallenge) {
+        throw new Error(
+          'Cannot enable profile while another profile with challenge is active');
+      }
       this.activeProfiles.forEach(p => p.options.isActive = false);
       this.activeProfiles = [];
       this.activeMode = profile.options.blockMode;

@@ -6,8 +6,7 @@
   font-size: 15px;
 }
 
-#confirmDeleteModal p {
-  font-size: 15px;
+#confirmDeleteModal .body {
   margin-bottom: 25px;
 }
 

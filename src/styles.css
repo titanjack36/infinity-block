@@ -52,6 +52,12 @@ body {
   background-color: #ffffff33;
 }
 
+.text-btn:disabled {
+  color: #a0a0a0;
+  border-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
 a.text-btn {
   box-sizing: border-box;
   display: block;
@@ -92,6 +98,13 @@ app-modal .btn-group button:first-child {
   margin-right: 10px;
 }
 
+app-modal .title {
+  margin-top: 0;
+}
+
+app-modal .body {
+  font-size: 15px;
+}
 
 
 .toggle-switch > input {

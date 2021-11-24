@@ -26,7 +26,7 @@
   [showModal]="newProfileModalOpen"
   (onHideModal)="hideNewProfileModal()"
   >
-  <h1>New Profile</h1>
+  <h1 class="title">New Profile</h1>
   <label for="newProfileNameInput">Profile Name</label>
   <input
     type="text"
@@ -46,7 +46,7 @@
   [showModal]="errorModalOpen"
   (onHideModal)="hideErrorModal()"
 >
-  <h1>Error</h1>
-  <div>{{ errorMsg }}</div>
+  <h1 class="title">Error</h1>
+  <div class="body">{{ errorMsg }}</div>
   <button class="text-btn" (click)="hideErrorModal()">OK</button>
 </app-modal>

@@ -1,85 +1,90 @@
 <div id="profileOptions" *ngIf="selectedProfile && modifiedProfile">
   <h3 class="options-title">Options</h3>
-  <div class="blockmode-section">
-    <h3>Block Mode</h3>
-    <div class="blockmode-choices">
-      <input type="radio" id="useBlockSites" [value]="BlockMode.BLOCK_SITES"
-          [(ngModel)]="modifiedProfile.options.blockMode" (change)="handleUpdateProfile()">
-      <label for="useBlockSites">
-        Only Block Listed Sites
-        <img src="assets/confirm-icon.svg">
-      </label>
-      <input type="radio" id="useAllowSites" [value]="BlockMode.ALLOW_SITES"
-          [(ngModel)]="modifiedProfile.options.blockMode" (change)="handleUpdateProfile()">
-      <label for="useAllowSites">
-        Only Allow Listed Sites
-        <img src="assets/confirm-icon.svg">
-      </label>
-    </div>
-  </div>
-  <div class="schedule-section" *ngIf="schedule">
-    <div class="title-with-toggle">
-      <h3>Schedule</h3>
-      <label class="toggle-switch small">
-        <input type="checkbox" [(ngModel)]="schedule!.isEnabled"
-            (change)="handleUpdateProfile()">
-        <span class="slider"></span>
-      </label>
-    </div>
-    <div class="sched-event-container"
-        *ngFor="let event of schedule!.events; let idx = index">
-      <div class="sched-event">
-        <app-select-menu [options]="schedEventTypeOptions"
-          [(selectedValue)]="event.eventType" (onSelection)="handleUpdateSchedEvents()">
-        </app-select-menu>
-        <p>at</p>
-        <input type="text" class="date-input textfield" placeholder="10:30am"
-          [(ngModel)]="event.timeStr" (focusout)="handleUpdateSchedEvents()">
-        <button class="icon-btn" id="removeEventBtn" (click)="handleRemoveSchedEvent(idx)">
-          <img src="assets/close.svg" alt="Delete">
-        </button>
+  <div class="options-body" *ngIf="!selectedProfile.options.isActive; else optionsDisabled">
+    <div class="blockmode-section">
+      <h3>Block Mode</h3>
+      <div class="blockmode-choices">
+        <input type="radio" id="useBlockSites" [value]="BlockMode.BLOCK_SITES"
+            [(ngModel)]="modifiedProfile.options.blockMode" (change)="handleUpdateProfile()">
+        <label for="useBlockSites">
+          Only Block Listed Sites
+          <img src="assets/confirm-icon.svg">
+        </label>
+        <input type="radio" id="useAllowSites" [value]="BlockMode.ALLOW_SITES"
+            [(ngModel)]="modifiedProfile.options.blockMode" (change)="handleUpdateProfile()">
+        <label for="useAllowSites">
+          Only Allow Listed Sites
+          <img src="assets/confirm-icon.svg">
+        </label>
       </div>
-      <div class="sched-event-error">{{ eventErrors[idx] }}</div>
     </div>
-    <button class="text-btn" id="addEventBtn" (click)="handleAddSchedEvent()">
-      Add Event
-    </button>
-  </div>
-  <div class="challenge-section" *ngIf="challenge">
-    <h3>Challenges</h3>
-    <div class="title-with-toggle">
-      <div>
-        Wait for
-        <input type="text" class="wait-time-input textfield"
-            [(ngModel)]="challenge.waitTime">
-        seconds
+    <div class="schedule-section" *ngIf="schedule">
+      <div class="title-with-toggle">
+        <h3>Schedule</h3>
+        <label class="toggle-switch small">
+          <input type="checkbox" [(ngModel)]="schedule!.isEnabled"
+              (change)="handleUpdateProfile()">
+          <span class="slider"></span>
+        </label>
       </div>
-      <label class="toggle-switch small">
-        <input type="checkbox" [(ngModel)]="challenge.waitTimeEnabled" 
-            (change)="handleUpdateProfile()">
-        <span class="slider"></span>
-      </label>
+      <div class="sched-event-container"
+          *ngFor="let event of schedule!.events; let idx = index">
+        <div class="sched-event">
+          <app-select-menu [options]="schedEventTypeOptions"
+            [(selectedValue)]="event.eventType" (onSelection)="handleUpdateSchedEvents()">
+          </app-select-menu>
+          <p>at</p>
+          <input type="text" class="date-input textfield" placeholder="10:30am"
+            [(ngModel)]="event.timeStr" (focusout)="handleUpdateSchedEvents()">
+          <button class="icon-btn" id="removeEventBtn" (click)="handleRemoveSchedEvent(idx)">
+            <img src="assets/close.svg" alt="Delete">
+          </button>
+        </div>
+        <div class="sched-event-error">{{ eventErrors[idx] }}</div>
+      </div>
+      <button class="text-btn" id="addEventBtn" (click)="handleAddSchedEvent()">
+        Add Event
+      </button>
+    </div>
+    <div class="challenge-section" *ngIf="challenge">
+      <h3>Challenges</h3>
+      <div class="title-with-toggle">
+        <div>
+          Wait for
+          <input type="text" class="wait-time-input textfield"
+              [(ngModel)]="challenge.waitTime">
+          seconds
+        </div>
+        <label class="toggle-switch small">
+          <input type="checkbox" [(ngModel)]="challenge.waitTimeEnabled" 
+              (change)="handleUpdateProfile()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="action-section">
+      <h3>Actions</h3>
+      <a id="exportBtn" class="text-btn" download="blocked_sites.json" [href]="exportHref">
+        Export Sites
+      </a>
+      <div class="text-btn file-upload" for="file">
+        <input type="file" (change)="handleImportSites($event)">
+        <p>Import Sites</p>
+      </div>
+      <button id="deleteProfileBtn" class="text-btn" (click)="showConfirmDeleteModal()">
+        Delete Profile
+      </button>
     </div>
   </div>
-  <div class="action-section">
-    <h3>Actions</h3>
-    <a id="exportBtn" class="text-btn" download="blocked_sites.json" [href]="exportHref">
-      Export Sites
-    </a>
-    <div class="text-btn file-upload" for="file">
-      <input type="file" (change)="handleImportSites($event)">
-      <p>Import Sites</p>
-    </div>
-    <button id="deleteProfileBtn" class="text-btn" (click)="showConfirmDeleteModal()">
-      Delete Profile
-    </button>
-  </div>
+  <ng-template #optionsDisabled>
+    Options are not availabe while the profile is active.
+  </ng-template>
 </div>
 
 <app-modal id="confirmDeleteModal" [showModal]="confirmDeleteModalOpen"
     (onHideModal)="hideConfirmDeleteModal()">
-  <h1>Confirm Delete</h1>
-  <p>Are you sure you want to delete <b>{{ selectedProfile?.name }}</b>?</p>
+  <h1 class="title">Confirm Delete</h1>
+  <p class="body">Are you sure you want to delete <b>{{ selectedProfile?.name }}</b>?</p>
   <div class="btn-group">
     <button class="text-btn" (click)="hideConfirmDeleteModal()">No</button>
     <button class="text-btn" (click)="handleRemoveProfile()">Yes</button>

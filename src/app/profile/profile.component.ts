@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import Timer from 'src/utils/timer';
 import { Profile } from '../../models/profile.interface';
 import { ProfileService } from '../profile.service';
 
@@ -17,11 +18,22 @@ export class ProfileComponent implements OnInit {
   newSiteUrl: string = '';
   editedProfileName: string = '';
   isEditingName: boolean = false;
+  waitTimer: Timer = new Timer();
+  waitTimeRemaining: number = 0;
+  challengeModalOpen: boolean = false;
+  allowDisable: boolean = false;
 
   constructor(
-    private profileService: ProfileService,
-    private router: Router,
-    private cdr: ChangeDetectorRef) { }
+      private profileService: ProfileService,
+      private router: Router,
+      private cdr: ChangeDetectorRef) {
+    this.waitTimer.attachCallback((timeInSecs: number) => {
+      this.waitTimeRemaining = timeInSecs;
+      if (timeInSecs === 0) {
+        this.allowDisable = true;
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
@@ -89,5 +101,29 @@ export class ProfileComponent implements OnInit {
 
   handleCancelEditName(): void {
     this.isEditingName = false;
+  }
+
+  handleToggleEnableProfile(): void {
+    const options = this.modifiedProfile!.options
+    if (!options.isActive && options.challenge.waitTimeEnabled) {
+      this.challengeModalOpen = true;
+      this.waitTimeRemaining = options.challenge.waitTime;
+      this.waitTimer.setTime(options.challenge.waitTime);
+      this.waitTimer.start();
+    } else {
+      this.handleUpdateProfile();
+    }
+  }
+
+  handleDisableProfile(): void {
+    this.challengeModalOpen = false;
+    this.waitTimer.stop();
+    this.handleUpdateProfile();
+    this.allowDisable = false;
+  }
+
+  handleHideChallengeModal() {
+    this.modifiedProfile!.options.isActive = true;
+    this.challengeModalOpen = false;
   }
 }

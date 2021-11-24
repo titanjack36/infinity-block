@@ -30,7 +30,7 @@
         <input 
           type="checkbox"
           [(ngModel)]="modifiedProfile.options.isActive"
-          (change)="handleUpdateProfile()">
+          (change)="handleToggleEnableProfile()">
         <span class="slider"></span>
       </label>
     </div>
@@ -64,6 +64,7 @@
   </div>
   <app-profile-options></app-profile-options>
 </div>
+
 <ng-template #showPrompt>
   <div id="createProfilePrompt">
     <h1>No Profiles</h1>
@@ -73,3 +74,19 @@
     </button>
   </div>
 </ng-template>
+
+<app-modal
+  id="challengeModal"
+  [showModal]="challengeModalOpen"
+  (onHideModal)="handleHideChallengeModal()"
+>
+  <h1 class="title">Wait!</h1>
+  <div class="body">Thinking of procrastinating? Consider going for a walk.</div>
+  <div class="btn-group">
+    <button class="text-btn" (click)="handleHideChallengeModal()">Cancel</button>
+    <button class="text-btn" (click)="handleDisableProfile()" [disabled]="!allowDisable">
+      Continue
+      <span *ngIf="!allowDisable"> | {{ waitTimeRemaining }}</span>
+    </button>
+  </div>
+</app-modal>
