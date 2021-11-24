@@ -8,7 +8,7 @@ export default class ActiveProfiles {
   constructor(activeList?: Profile[]) {
     this.activeMode = BlockMode.ALLOW_SITES;
     this.activeProfiles = [];
-    activeList?.forEach(p => this.add(p));
+    activeList?.forEach(p => this.add(p, true));
   }
 
   isEmpty(): boolean {
@@ -39,16 +39,18 @@ export default class ActiveProfiles {
     return this.activeProfiles.find(p => p.name === profileName);
   }
 
-  add(profile: Profile): void {
+  add(profile: Profile, force: boolean = false): void {
     if (this.has(profile)) {
       return;
     }
     if (this.activeMode !== profile.options.blockMode) {
-      const activeWithChallenge = 
+      if (!force) {
+        const activeWithChallenge = 
         !!this.activeProfiles.find(p => p.options.challenge.waitTimeEnabled);
-      if (activeWithChallenge) {
-        throw new Error(
-          'Cannot enable profile while another profile with challenge is active');
+        if (activeWithChallenge) {
+          throw new Error(
+            'Cannot enable profile while another profile with challenge is active');
+        }
       }
       this.activeProfiles.forEach(p => p.options.isActive = false);
       this.activeProfiles = [];

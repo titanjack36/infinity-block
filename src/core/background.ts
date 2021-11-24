@@ -227,7 +227,7 @@ async function checkSchedEvents(): Promise<void> {
     if (getTimeInSecs(event.time!) < getTimeInSecs(new Date())) {
       try {
         if (event.eventType === SchedEventType.ENABLE) {
-          activeProfiles.add(getProfile(event.profileName));
+          activeProfiles.add(getProfile(event.profileName), true);
           restoreBlockedTabs();
           blockTabsMatchingActive();
         } else if (activeProfiles.hasName(event.profileName)) {
