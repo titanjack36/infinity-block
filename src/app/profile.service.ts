@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { BlockMode, Profile, SchedEvent, Site } from '../models/profile.interface';
 import { isValidUrl, receiveMessage, sendAction } from '../utils/utils';
 import { Action, Response, Request } from '../models/message.interface';
-import ActiveProfiles from '../models/active-profile';
+import ActiveProfiles from '../core/active-profile';
 
 @Injectable({
   providedIn: 'root'

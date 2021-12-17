@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 import { Action, Request, Response } from '../models/message.interface';
-import { setHours, setMinutes } from 'date-fns';
+import { setHours, setMinutes, setSeconds } from 'date-fns';
 
 export async function sendAction(action: Action, body?: any): Promise<Response> {
   return new Promise((resolve, reject) => {
@@ -80,6 +80,7 @@ export function parseTime(timeStr: string | undefined): Date | undefined {
   const [hours, minutes, ampm] = match.slice(1, 4);
   date = setHours(date, parseInt(hours) + (ampm == 'am' ? 0 : 12));
   date = setMinutes(date, parseInt(minutes));
+  date = setSeconds(date, 0);
   return date;
 }
 

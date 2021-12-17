@@ -1,4 +1,4 @@
-import { BlockMode, Profile } from "./profile.interface";
+import { BlockMode, Profile } from "../models/profile.interface";
 
 export default class ActiveProfiles {
 

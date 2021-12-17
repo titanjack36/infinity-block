@@ -13,7 +13,7 @@ export class ProfileComponent implements OnInit {
 
   @ViewChild('profileNameInput') profileNameInput: any;
   @Output() onCreateProfile = new EventEmitter<void>();
-  selectedProfile: Profile | undefined;
+  _selectedProfile: Profile | undefined;
   modifiedProfile: Profile | undefined;
   newSiteUrl: string = '';
   editedProfileName: string = '';
@@ -35,6 +35,15 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  set selectedProfile(profile: Profile | undefined) {
+    this._selectedProfile = profile;
+    this.resetModifiedProfile();
+  }
+
+  get selectedProfile(): Profile | undefined {
+    return this._selectedProfile;
+  }
+
   ngOnInit(): void {
     this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
       if (!this.selectedProfile || !this.modifiedProfile) {
@@ -42,16 +51,14 @@ export class ProfileComponent implements OnInit {
       }
       const updatedProfile = activeProfiles.find(this.selectedProfile.name);
       if (updatedProfile) {
-        this.selectedProfile.options.isActive = true;
-        this.modifiedProfile.options.isActive = true;
-        this.selectedProfile.options.schedule = updatedProfile.options.schedule;
+        this.selectedProfile = updatedProfile;
         this.cdr.detectChanges();
       }
     });
 
     this.profileService.onProfileUpdated().subscribe((profile) => {
       this.selectedProfile = profile;
-      this.resetModifiedProfile();
+      this.cdr.detectChanges();
     });
   }
 

@@ -1,39 +1,31 @@
 import { BlockMode, Profile, SchedEvent, SchedEventType, Site } from '../models/profile.interface';
 import { Action, Request } from '../models/message.interface';
 import { getAllTabs, getTab, getTimeInSecs, receiveMessage, sendAction } from '../utils/utils';
-import { isSameDay } from 'date-fns';
-import ActiveProfiles from '../models/active-profile';
+import ActiveProfiles from './active-profile';
+import EventScheduler from './event-scheduler';
 
 const defaultRedirectUrl: string = `${chrome.extension.getURL('app/index.html')}#/block`
 
-var profiles: Profile[] = [];
-var activeProfiles: ActiveProfiles = new ActiveProfiles();
-var blockedTabIdMap: Map<number, string> = new Map();
-var pendingSchedEvents: SchedEvent[] = [];
-var prevSavedDate: Date | undefined = undefined;
+let profiles: Profile[] | undefined = undefined;
+let activeProfiles: ActiveProfiles | undefined = undefined;
+let eventScheduler: EventScheduler | undefined = undefined;
+let blockedTabIdMap: Map<number, string> = new Map();
+let pendingSchedEvents: SchedEvent[] = [];
+let prevSavedDate: Date | undefined = undefined;
 
 chrome.storage.local.get(['profiles', 'prevSavedDate'], result => {
   if (!result) {
     return;
   }
-  if (result.profiles) {
-    profiles = result.profiles;
-    activeProfiles = new ActiveProfiles(
-      profiles.filter(profile => profile.options.isActive));
-  }
-  if (result.prevSavedDate) {
-    prevSavedDate = new Date(JSON.parse(result.prevSavedDate));
-  } else {
-    prevSavedDate = new Date();
-  }
-
-  checkIfNewDay();
-  checkSchedEvents();
+  init(result);
 });
 
-receiveMessage(async (request: Request, sender): Promise<any> => {
+receiveMessage(async (request: Request, _): Promise<any> => {
   if (!request?.action == undefined) {
     throw new Error('Request must specify an action');
+  }
+  if (!profiles || !activeProfiles || !eventScheduler) {
+    throw new Error('Failed to access profiles.');
   }
 
   let responseBody: any = undefined;
@@ -55,7 +47,7 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
       }
       restoreBlockedTabs();
       blockTabsMatchingActive();
-      updatePendingSchedEvents();
+      eventScheduler.onProfilesUpdated(profiles);
       saveProfiles();
       break;
 
@@ -107,7 +99,7 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
           return getTimeInSecs(ev1.time!) - getTimeInSecs(ev2.time!);
         });
       profiles[profileIdx].options.schedule.events = processedEvents;
-      updatePendingSchedEvents();
+      eventScheduler.onProfilesUpdated(profiles);
       responseBody = profiles[profileIdx];
       saveProfiles();
       break;
@@ -120,7 +112,7 @@ receiveMessage(async (request: Request, sender): Promise<any> => {
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (activeProfiles.isEmpty() || !(changeInfo.url && tabId && tab)) {
+  if (activeProfiles?.isEmpty() || !(changeInfo.url && tabId && tab)) {
     return;
   }
   if (isSiteBlocked(changeInfo.url)) {
@@ -132,16 +124,61 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
+function init(savedState: any) {
+  if (savedState.profiles) {
+    profiles = savedState.profiles;
+    const activeProfileList = profiles!.filter(profile => profile.options.isActive);
+    activeProfiles = new ActiveProfiles(activeProfileList);
+  }
+  let lastRecordedDate;
+  if (savedState.lastRecordedDate) {
+    lastRecordedDate = new Date(JSON.parse(savedState.lastRecordedDate));
+  } else {
+    lastRecordedDate = new Date();
+  }
+  eventScheduler = new EventScheduler(lastRecordedDate);
+
+  eventScheduler.onEventTrigger((event: SchedEvent) => {
+    if (event.eventType === SchedEventType.ENABLE) {
+      activeProfiles!.add(getProfile(event.profileName), true);
+      restoreBlockedTabs();
+      blockTabsMatchingActive();
+    } else if (activeProfiles!.hasName(event.profileName)) {
+      const profile = activeProfiles!.removeWithName(event.profileName)!;
+      profile.options.isActive = false;
+      restoreBlockedTabs();
+    }
+    event.executed = true;
+    sendAction(Action.NOTIFY_SCHEDULE_TRIGGER).catch((err) => { });
+    saveProfiles();
+  });
+
+  eventScheduler.onEventReset(() => {
+    profiles!.forEach(profile => {
+      profile.options.schedule.events.forEach(event => {
+        event.executed = false;
+      });
+    });
+    saveProfiles();
+    eventScheduler!.onProfilesUpdated(profiles!);
+    chrome.storage.local.set({ 
+      lastRecordedDate: JSON.stringify(new Date()) 
+    }, () => {});
+  });
+
+  blockTabsMatchingActive();
+}
+
 function getProfile(profileName: string): Profile {
   const profileIdx = getProfileIndexFromName(profileName);
-  return profiles[profileIdx];
+  return profiles![profileIdx];
 }
 
 function getProfileIndexFromName(profileName: string): number {
   if (!profileName) {
     throw new Error('Profile name is not specified');
   }
-  const targetProfileIdx = profiles.findIndex(profile => profile.name == profileName);
+  const targetProfileIdx = profiles!.findIndex(profile => profile.name == profileName);
   if (targetProfileIdx === -1) {
     throw new Error(`Could not find profile with name "${profileName}"`);
   }
@@ -169,14 +206,14 @@ async function restoreBlockedTabs() {
 }
 
 function isSiteBlocked(siteUrl: string): boolean {
-  if (activeProfiles.isEmpty()) {
+  if (activeProfiles!.isEmpty()) {
     return false;
   }
   if (!(siteUrl.includes('http://') || siteUrl.includes('https://'))) {
     return false;
   }
   let matched: boolean = false;
-  for (const profile of activeProfiles.getList()) {
+  for (const profile of activeProfiles!.getList()) {
     matched = !!profile.sites.find(site => {
       if (site.useRegex) {
         const urlRegex = new RegExp(site.url);
@@ -189,7 +226,7 @@ function isSiteBlocked(siteUrl: string): boolean {
       break;
     }
   }
-  const blockMode = activeProfiles.getActiveMode();
+  const blockMode = activeProfiles!.getActiveMode();
   return (matched && blockMode === BlockMode.BLOCK_SITES)
     || (!matched && blockMode === BlockMode.ALLOW_SITES);
 }
@@ -210,66 +247,3 @@ function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl,
 function saveProfiles(): void {
   chrome.storage.local.set({ profiles }, () => {});
 }
-
-function updatePendingSchedEvents(): void {
-  pendingSchedEvents = [];
-  profiles.forEach(profile => {
-    const schedule = profile.options.schedule;
-    if (schedule.isEnabled) {
-      pendingSchedEvents.push(...schedule.events.filter(events => !events.executed));
-    }
-  });
-}
-
-async function checkSchedEvents(): Promise<void> {
-  const remainingEvents = [];
-  for (const event of pendingSchedEvents) {
-    if (getTimeInSecs(event.time!) < getTimeInSecs(new Date())) {
-      try {
-        if (event.eventType === SchedEventType.ENABLE) {
-          activeProfiles.add(getProfile(event.profileName), true);
-          restoreBlockedTabs();
-          blockTabsMatchingActive();
-        } else if (activeProfiles.hasName(event.profileName)) {
-          const profile = activeProfiles.removeWithName(event.profileName)!;
-          profile.options.isActive = false;
-          restoreBlockedTabs();
-        }
-      } catch (err) {
-        console.error(err);
-      }
-      event.executed = true;
-    } else {
-      remainingEvents.push(event);
-    }
-  }
-  if (remainingEvents.length !== pendingSchedEvents.length) {
-    pendingSchedEvents = remainingEvents;
-    sendAction(Action.NOTIFY_SCHEDULE_TRIGGER).catch((err) => { });
-    saveProfiles();
-  }
-}
-
-function checkIfNewDay() {
-  if (!prevSavedDate) {
-    return;
-  }
-  // reset all events if new day
-  const newDate = new Date();
-  if (!isSameDay(prevSavedDate, newDate)) {
-    profiles.forEach(profile => {
-      profile.options.schedule.events.forEach(event => {
-        event.executed = false;
-      });
-    });
-    saveProfiles();
-    updatePendingSchedEvents();
-  }
-  prevSavedDate = newDate;
-  chrome.storage.local.set({ prevSavedDate: JSON.stringify(prevSavedDate) }, () => {});
-}
-
-setInterval(() => {
-  checkIfNewDay();
-  checkSchedEvents();
-}, 5000);

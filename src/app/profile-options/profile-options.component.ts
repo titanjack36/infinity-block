@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import format from 'date-fns/format';
@@ -14,12 +14,11 @@ import { Option} from '../select-menu/select-menu.component';
 })
 export class ProfileOptionsComponent implements OnInit {
 
-  selectedProfile: Profile | undefined;
+  _selectedProfile: Profile | undefined;
   modifiedProfile: Profile | undefined;
   confirmDeleteModalOpen: boolean = false;
   exportHref: SafeUrl = '';
 
-  schedule: Schedule | undefined;
   challenge: Challenge | undefined;
   eventErrors: string[] = [];
   schedEventTypeOptions: Option[] = [
@@ -30,7 +29,25 @@ export class ProfileOptionsComponent implements OnInit {
   constructor(
     private router: Router,
     private profileService: ProfileService,
-    private sanitizer: DomSanitizer) { }
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef) { }
+
+  set selectedProfile(profile: Profile | undefined) {
+    this._selectedProfile = profile;
+    this.resetModifiedProfile();
+  }
+
+  get selectedProfile(): Profile | undefined {
+    return this._selectedProfile;
+  }
+
+  get schedule(): Schedule | undefined {
+    return this.modifiedProfile?.options.schedule;
+  }
+
+  get BlockMode() {
+    return BlockMode;
+  }
 
   ngOnInit(): void {
     this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
@@ -39,15 +56,15 @@ export class ProfileOptionsComponent implements OnInit {
       }
       const updatedProfile = activeProfiles.find(this.selectedProfile.name);
       if (updatedProfile) {
-        this.selectedProfile.options.schedule = updatedProfile.options.schedule;
+        this.selectedProfile = updatedProfile;
+        this.cdr.detectChanges();
         this.updateExportHref();
       }
     });
     this.profileService.onProfileUpdated().subscribe((profile) => {
       this.selectedProfile = profile;
+      this.cdr.detectChanges();
       this.updateExportHref();
-      this.resetModifiedProfile();
-      this.schedule = this.modifiedProfile?.options.schedule;
       if (this.schedule) {
         this.eventErrors = new Array(this.schedule.events.length).fill('');
       }
@@ -146,9 +163,5 @@ export class ProfileOptionsComponent implements OnInit {
     } catch (err: any) {
       this.profileService.sendError(`Failed to parse file: ${err.message}`);
     }
-  }
-
-  get BlockMode() {
-    return BlockMode;
   }
 }
