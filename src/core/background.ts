@@ -142,7 +142,11 @@ function init(savedState: any) {
     const activeProfileList = profiles!.filter(profile => profile.options.isActive);
     activeProfiles = new ActiveProfiles(activeProfileList);
     blockTabsMatchingActive();
+  } else {
+    profiles = [];
+    activeProfiles = new ActiveProfiles();
   }
+
   let lastRecordedDate;
   if (savedState.lastRecordedDate) {
     lastRecordedDate = new Date(JSON.parse(savedState.lastRecordedDate));
