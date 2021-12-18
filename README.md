@@ -1,27 +1,28 @@
 # Infinity Block
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.1.
+![Infinity block extension screenshot.](./src/assets/screenshot.png)
 
-## Development server
+Infinity Block is a Chrome extension that helps users avoid online distractions 
+while working on their computer. The extension can be used to block certain websites
+when enabled and allows for different blocking profiles to suit multiple different
+types of work.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+# Development
+## Setup
 
-## Code scaffolding
+After downloading the repository, use
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```
+$ yarn install
+```
 
-## Build
+to install the libraries required by the extension. Then, use
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```
+$ yarn run build
+```
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+to build the extension application. This should produce a `dist` folder in the repository.
+Navigate to the Chrome extension page, and enable developer mode at the top right corner. 
+Click `Load unpacked` at the top left corner, navigate to the `dist` folder in the 
+repository and click `Select Folder`.
