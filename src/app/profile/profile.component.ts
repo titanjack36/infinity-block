@@ -86,7 +86,9 @@ export class ProfileComponent implements OnInit {
   }
 
   async handleUpdateProfile(): Promise<void> {
-    if (!await this.profileService.updateProfile(this.modifiedProfile!)) {
+    const success = await this.profileService.updateProfile(
+      this.modifiedProfile!, this.selectedProfile!);
+    if (!success) {
       this.resetModifiedProfile();
     }
   }
@@ -99,7 +101,9 @@ export class ProfileComponent implements OnInit {
 
   async handleSaveEditName(): Promise<void> {
     const trimmedName = this.editedProfileName.trim();
-    if (await this.profileService.updateProfileName(trimmedName, this.selectedProfile!.name)) {
+    const success = await this.profileService.updateProfileName(
+      this.selectedProfile!, trimmedName);
+    if (success) {
       this.selectedProfile!.name = trimmedName;
       this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
       this.isEditingName = false;

@@ -81,7 +81,9 @@ export class ProfileOptionsComponent implements OnInit {
   }
 
   async handleUpdateProfile(): Promise<void> {
-    if (!await this.profileService.updateProfile(this.modifiedProfile!)) {
+    const success = await this.profileService.updateProfile(
+      this.modifiedProfile!, this.selectedProfile!);
+    if (!success) {
       this.resetModifiedProfile();
     }
   }

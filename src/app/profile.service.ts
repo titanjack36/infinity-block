@@ -141,35 +141,34 @@ export class ProfileService {
     return true;
   }
 
-  async addSite(modifiedProfile: Profile, siteUrl: string): Promise<boolean> {
+  async addSite(profile: Profile, siteUrl: string): Promise<boolean> {
     if (siteUrl.length == 0) {
       this.error.next('New site URL cannot be empty');
       return false;
     }
-    // if (!isValidUrl(siteUrl)) {
-    //   this.error.next('New site URL is invalid');
-    //   return false;
-    // }
     if (this.siteUrlSet.has(siteUrl)) {
       this.error.next('Site with URL already exists');
       return false;
     }
+    const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
     modifiedProfile.sites.push({ url: siteUrl, useRegex: false });
-    return this.updateProfile(modifiedProfile);
+    return this.updateProfile(modifiedProfile, profile);
   }
 
-  async removeSite(modifiedProfile: Profile, siteIdx: number): Promise<boolean> {
+  async removeSite(profile: Profile, siteIdx: number): Promise<boolean> {
+    const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
     modifiedProfile.sites.splice(siteIdx, 1);
-    return await this.updateProfile(modifiedProfile);
+    return await this.updateProfile(modifiedProfile, profile);
   }
 
-  async updateProfile(modifiedProfile: Profile): Promise<boolean> {
+  async updateProfile(modifiedProfile: Profile, origProfile: Profile): Promise<boolean> {
     const response: Response = await sendAction(Action.UPDATE_PROFILE, {
-      profileName: modifiedProfile.name,
-      profile: modifiedProfile
+      profileName: origProfile.name,
+      profile: modifiedProfile,
+      origProfile: origProfile
     });
     if (response.error) {
-      this.error.next(`Failed to update profile options: ${response.error.message}`);
+      this.error.next(`Failed to update profile: ${response.error.message}`);
       return false;
     }
     this.selectedProfile = modifiedProfile;
@@ -177,7 +176,7 @@ export class ProfileService {
     return true;
   }
 
-  async updateProfileName(newProfileName: string, origProfileName: string): Promise<boolean> {
+  async updateProfileName(profile: Profile, newProfileName: string): Promise<boolean> {
     if (!newProfileName) {
       this.error.next('Profile name cannot be empty');
       return false;
@@ -186,14 +185,9 @@ export class ProfileService {
       this.error.next('Profile with name already exists');
       return false;
     }
-    const response: Response = await sendAction(Action.UPDATE_PROFILE_NAME, 
-      { prevProfileName: origProfileName, newProfileName });
-    if (response.error) {
-      this.error.next(`Failed to update profile name: ${response.error}`);
-      return false;
-    }
-    await Promise.all([this.updateProfileNames(), this.updateActiveProfiles()]);
-    return true;
+    const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
+    modifiedProfile.name = newProfileName;
+    return await this.updateProfile(modifiedProfile, profile);
   }
 
   async removeProfile(profile: Profile): Promise<boolean> {

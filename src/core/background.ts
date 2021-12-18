@@ -32,10 +32,13 @@ receiveMessage(async (request: Request, _): Promise<any> => {
   switch(request.action) {
     case Action.UPDATE_PROFILE:
       const profile: Profile | undefined = request.body.profile;
+      if (!request.body?.profileName) {
+        throw new Error('Profile name is undefined');
+      }
       if (!profile) {
         throw new Error('Updated profile is undefined');
       }
-      profileIdx = getProfileIndexFromName(request.body?.profileName);
+      profileIdx = getProfileIndexFromName(request.body.profileName);
       profiles[profileIdx] = profile;
       // remove the old profile from the list of active profiles if 
       // it was previously active
@@ -75,18 +78,18 @@ receiveMessage(async (request: Request, _): Promise<any> => {
       saveProfiles();
       break;
 
-    case Action.UPDATE_PROFILE_NAME:
-      if (!request.body.prevProfileName) {
-        throw new Error("Previous profile name is undefined");
-      }
-      if (!request.body.newProfileName) {
-        throw new Error("New profile name is undefined");
-      }
-      profileIdx = getProfileIndexFromName(request.body.prevProfileName);
-      profiles[profileIdx].name = request.body.newProfileName;
-      responseBody = profiles[profileIdx];
-      saveProfiles();
-      break;
+    // case Action.UPDATE_PROFILE_NAME:
+    //   if (!request.body.prevProfileName) {
+    //     throw new Error("Previous profile name is undefined");
+    //   }
+    //   if (!request.body.newProfileName) {
+    //     throw new Error("New profile name is undefined");
+    //   }
+    //   profileIdx = getProfileIndexFromName(request.body.prevProfileName);
+    //   profiles[profileIdx].name = request.body.newProfileName;
+    //   responseBody = profiles[profileIdx];
+    //   saveProfiles();
+    //   break;
 
     case Action.UPDATE_SCHEDULE_EVENTS:
       const events: SchedEvent[] | undefined = request.body.events;
