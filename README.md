@@ -1,5 +1,7 @@
 # Infinity Block
 
+![Infinity block extension screenshot.](./src/assets/screenshot.png)
+
 Infinity Block is a Chrome extension that helps users avoid online distractions 
 while working on their computer. The extension can be used to block certain websites
 when enabled and allows for different blocking profiles to suit multiple different
