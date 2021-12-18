@@ -1,7 +1,8 @@
 const path = require('path');
 const FileManagerPlugin = require('filemanager-webpack-plugin');
 
-const appName = "infinity-block";
+const BUILD_DIR = path.resolve(__dirname, 'dist');
+const SRC_DIR = path.resolve(__dirname, 'src');
 
 module.exports = {
   entry: {
@@ -9,7 +10,7 @@ module.exports = {
   },
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'dist'),
+    path: BUILD_DIR,
   },
   resolve: {
     extensions: ['.ts']
@@ -28,16 +29,16 @@ module.exports = {
         onEnd: {
           copy: [
             {
-              source: './src/popup/popup.html',
-              destination: './dist/',
+              source: path.join(SRC_DIR, 'popup/popup.html'),
+              destination: path.join(BUILD_DIR, './'),
             },
             {
-              source: './src/popup/popup.js',
-              destination: './dist/',
+              source: path.join(SRC_DIR, 'popup/popup.js'),
+              destination: path.join(BUILD_DIR, './'),
             },
             {
-              source: './manifest.json',
-              destination: './dist/',
+              source: path.join(SRC_DIR, 'manifest.json'),
+              destination: path.join(BUILD_DIR, './'),
             }
           ]
         }
