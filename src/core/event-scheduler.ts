@@ -10,7 +10,6 @@ export default class EventScheduler {
   resetHandler?: () => void;
 
   /**
-   * 
    * @param lastRecordedDate last recorded date by the app
    */
   constructor(lastRecordedDate: Date) {
