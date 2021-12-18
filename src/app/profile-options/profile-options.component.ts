@@ -49,6 +49,10 @@ export class ProfileOptionsComponent implements OnInit {
     return BlockMode;
   }
 
+  get exportFileName(): string {
+    return `block_sites_${this.selectedProfile!.name}.json`;
+  }
+
   ngOnInit(): void {
     this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
       if (!this.selectedProfile || !this.modifiedProfile) {

@@ -64,7 +64,7 @@
     </div>
     <div class="action-section">
       <h3>Actions</h3>
-      <a id="exportBtn" class="text-btn" download="blocked_sites.json" [href]="exportHref">
+      <a id="exportBtn" class="text-btn" [download]="exportFileName" [href]="exportHref">
         Export Sites
       </a>
       <div class="text-btn file-upload" for="file">
