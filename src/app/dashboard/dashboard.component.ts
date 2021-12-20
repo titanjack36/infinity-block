@@ -1,9 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import ActiveProfiles from '../../core/active-profile';
-import { Action, Response } from '../../models/message.interface';
-import { BlockMode, Profile } from '../../models/profile.interface';
-import { sendAction } from '../../utils/utils';
 import { ProfileService } from '../profile.service';
 
 @Component({
@@ -16,6 +13,7 @@ export class DashboardComponent implements OnInit {
   profileNames: string[] = [];
   newProfileName: string = '';
   activeProfiles: ActiveProfiles = new ActiveProfiles();
+  selectedProfileName: string | undefined;
   errorMsg: string = '';
   newProfileModalOpen: boolean = false;
   errorModalOpen: boolean = false;
@@ -24,44 +22,51 @@ export class DashboardComponent implements OnInit {
     private profileService: ProfileService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef) { }
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone) { }
 
   async ngOnInit(): Promise<void> {
+    const profiles = await this.profileService.getProfiles();
+    this.profileNames = profiles.map(p => p.name);
+    this.activeProfiles = new ActiveProfiles(
+      profiles.filter(p => p.options.isActive)
+    );
 
-    this.profileService.onProfileNamesUpdated().subscribe((profileNames) => {
-      this.profileNames = profileNames;
+    this.ngZone.run(() => {
+      this.profileService.onProfilesUpdated().subscribe(profiles => {
+        if (!profiles) {
+          return;
+        }
+        this.profileNames = profiles.map(p => p.name);
+        this.activeProfiles = new ActiveProfiles(
+          profiles.filter(p => p.options.isActive)
+        );
+      });
     });
-    this.profileService.onActiveProfilesUpdated().subscribe((activeProfiles) => {
-      this.activeProfiles = activeProfiles;
-      this.cdr.detectChanges();
-    });
+
     this.profileService.onError().subscribe((errorMsg) => {
       if (errorMsg) {
         this.showErrorModal(errorMsg);
       }
     });
 
-    // profile names and active profile must be up to date before reading params
-    await this.profileService.updateProfileNames();
-    await this.profileService.updateActiveProfiles();
     this.activatedRoute.queryParams.subscribe(async (params) => {
       if (params.profile) {
-        const response: Response = await sendAction(Action.GET_PROFILE, params.profile);
-        if (!response.error) {
-          this.profileService.selectedProfile = response.body;
+        if (this.profileNames.find(name => name == params.profile)) {
+          this.selectedProfileName = params.profile;
           return;
         } else {
-          this.profileService.sendError(`Failed to fetch profile: ${response.error.message}`);
+          this.profileService.broadcastError(`No such profile: ${params.profile}`);
         }
       }
 
-      this.profileNames = this.profileService.profileNames;
-      this.activeProfiles = this.profileService.activeProfiles;
+      // if no profiles selected, select the last activated profile. If there are
+      // no active profiles, select the first profile in the list.
       const redirectProfile = this.activeProfiles.last()?.name ?? this.profileNames[0];
       if (redirectProfile) {
         this.router.navigate(['.'], { queryParams: { profile: redirectProfile }});
       } else {
-        this.profileService.selectedProfile = undefined;
+        this.selectedProfileName = undefined;
       }
     });
   }
@@ -72,7 +77,6 @@ export class DashboardComponent implements OnInit {
       this.newProfileName = '';
       this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
       this.hideNewProfileModal();
-      this.cdr.detectChanges();
     }
   }
 
@@ -92,9 +96,5 @@ export class DashboardComponent implements OnInit {
   hideErrorModal(): void {
     this.errorMsg = '';
     this.errorModalOpen = false;
-  }
-
-  getSelectedProfileName(): string | undefined {
-    return this.profileService.selectedProfile?.name;
   }
 }

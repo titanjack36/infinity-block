@@ -4,7 +4,7 @@
   <a
     *ngFor="let profileName of profileNames"
     class="profile"
-    [class.selected]="profileName == getSelectedProfileName()"
+    [class.selected]="profileName == selectedProfileName"
     routerLink="./"
     [queryParams]="{profile: profileName}"
   >
@@ -18,8 +18,18 @@
     <img src="assets/plus.svg" alt="Add Profile">
   </button>
 </div>
-<app-profile (onCreateProfile)="showNewProfileModal()">
+<app-profile *ngIf="selectedProfileName; else showPrompt" 
+  [selectedProfileName]="selectedProfileName" (onCreateProfile)="showNewProfileModal()">
 </app-profile>
+<ng-template #showPrompt>
+  <div id="createProfilePrompt">
+    <h1>No Profiles</h1>
+    <p>Create a profile by clicking</p>
+    <button id="addProfileBtn" (click)="showNewProfileModal()">
+      <img src="assets/plus.svg" alt="Add Profile">
+    </button>
+  </div>
+</ng-template>
 
 <app-modal
   id="newProfileModal"

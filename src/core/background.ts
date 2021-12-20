@@ -1,6 +1,6 @@
-import { BlockMode, Profile, SchedEvent, SchedEventType, Site } from '../models/profile.interface';
-import { Action, Request } from '../models/message.interface';
-import { getAllTabs, getTab, getTimeInSecs, receiveMessage, sendAction } from '../utils/utils';
+import { BlockMode, Profile, SchedEvent, SchedEventType } from '../models/profile.interface';
+import { Action, Request, Response } from '../models/message.interface';
+import { getAllTabs, getTab, getTimeInSecs, sendAction } from '../utils/utils';
 import ActiveProfiles from './active-profile';
 import EventScheduler from './event-scheduler';
 
@@ -18,102 +18,106 @@ chrome.storage.local.get(['profiles', 'lastRecordedDate'], result => {
   init(result);
 });
 
-receiveMessage(async (request: Request, _): Promise<any> => {
-  if (!request?.action == undefined) {
-    throw new Error('Request must specify an action');
+chrome.runtime.onMessage.addListener(
+  (request: Request, sender: chrome.runtime.MessageSender, sendResponse) => {
+    // only accept messages sent from front end
+    if (sender.tab === undefined) {
+      return true;
+    }
+
+    const response: Response = {};
+    try {
+      if (!request?.action == undefined) {
+        throw new Error('Request must specify an action');
+      }
+      if (!profiles || !activeProfiles || !eventScheduler) {
+        throw new Error('Failed to access profiles.');
+      }
+    
+      let responseBody: any = undefined;
+      let profileIdx: number | undefined;
+    
+      switch(request.action) {
+        case Action.UPDATE_PROFILE:
+          const profile: Profile | undefined = request.body.profile;
+          if (!request.body?.profileName) {
+            throw new Error('Target profile name is undefined');
+          }
+          if (!profile) {
+            throw new Error('Updated profile is undefined');
+          }
+          const nameChanged = (profile.name !== request.body.profileName);
+          const duplicateName = profiles.find(p => p.name === profile.name);
+          if (nameChanged && duplicateName) {
+            throw new Error('Duplicate profile name with existing profile');
+          }
+          profileIdx = getProfileIndexFromName(request.body.profileName);
+          profiles[profileIdx] = profile;
+    
+          // remove the old profile from the list of active profiles if 
+          // it was previously active
+          if (activeProfiles.hasName(request.body.profileName)) {
+            activeProfiles.removeWithName(request.body.profileName);
+          }
+    
+          // if profile is active, add it to the list of active profiles
+          if (profile.options.isActive) {
+            activeProfiles.add(profile);
+          }
+    
+          // filter out events without date object, and sort by time
+          const processedEvents = profile.options.schedule.events
+            .filter(event => event.time)
+            .sort((ev1, ev2) => {
+              return getTimeInSecs(ev1.time!) - getTimeInSecs(ev2.time!);
+            });
+          profiles[profileIdx].options.schedule.events = processedEvents;
+          eventScheduler.onProfilesUpdated(profiles);
+    
+          restoreBlockedTabs();
+          blockTabsMatchingActive();
+          saveProfiles();
+          sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
+          break;
+    
+        // case Action.GET_PROFILE_NAMES:
+        //   responseBody = profiles.map(profile => profile.name);
+        //   break;
+    
+        case Action.ADD_PROFILE:
+          if (!request.body) {
+            throw new Error('New profile is undefined');
+          }
+          const newProfile: Profile = request.body;
+          if (profiles.find(p => p.name === newProfile.name)) {
+            throw new Error('Profile with name already exists');
+          }
+          profiles.push(request.body);
+          saveProfiles();
+          sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
+          break;
+    
+        case Action.REMOVE_PROFILE:
+          profileIdx = getProfileIndexFromName(request.body);
+          profiles.splice(profileIdx, 1);
+          saveProfiles();
+          sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
+          break;
+    
+        case Action.GET_PROFILES:
+          responseBody = profiles;
+          break;
+      }
+      response.body = responseBody;
+    } catch (err: any) {
+      console.error(err);
+      response.error = { message: err.message };
+    } finally {
+      sendResponse(response);
+    }
+    return true;
   }
-  if (!profiles || !activeProfiles || !eventScheduler) {
-    throw new Error('Failed to access profiles.');
-  }
-
-  let responseBody: any = undefined;
-  let profileIdx: number | undefined;
-
-  switch(request.action) {
-    case Action.UPDATE_PROFILE:
-      const profile: Profile | undefined = request.body.profile;
-      if (!request.body?.profileName) {
-        throw new Error('Profile name is undefined');
-      }
-      if (!profile) {
-        throw new Error('Updated profile is undefined');
-      }
-      profileIdx = getProfileIndexFromName(request.body.profileName);
-      profiles[profileIdx] = profile;
-      // remove the old profile from the list of active profiles if 
-      // it was previously active
-      if (activeProfiles.hasName(request.body.profileName)) {
-        activeProfiles.removeWithName(request.body.profileName);
-      }
-      // if profile is active, add it to the list of active profiles
-      if (profile.options.isActive) {
-        activeProfiles.add(profile);
-      }
-      restoreBlockedTabs();
-      blockTabsMatchingActive();
-      eventScheduler.onProfilesUpdated(profiles);
-      saveProfiles();
-      break;
-
-    case Action.GET_PROFILE_NAMES:
-      responseBody = profiles.map(profile => profile.name);
-      break;
-
-    case Action.ADD_PROFILE:
-      if (!request.body) {
-        throw new Error('New profile is undefined');
-      }
-      profiles.push(request.body);
-      saveProfiles();
-      break;
-
-    case Action.GET_PROFILE:
-      profileIdx = getProfileIndexFromName(request.body);
-      responseBody = profiles[profileIdx];
-      break;
-
-    case Action.REMOVE_PROFILE:
-      profileIdx = getProfileIndexFromName(request.body);
-      profiles.splice(profileIdx, 1);
-      saveProfiles();
-      break;
-
-    // case Action.UPDATE_PROFILE_NAME:
-    //   if (!request.body.prevProfileName) {
-    //     throw new Error("Previous profile name is undefined");
-    //   }
-    //   if (!request.body.newProfileName) {
-    //     throw new Error("New profile name is undefined");
-    //   }
-    //   profileIdx = getProfileIndexFromName(request.body.prevProfileName);
-    //   profiles[profileIdx].name = request.body.newProfileName;
-    //   responseBody = profiles[profileIdx];
-    //   saveProfiles();
-    //   break;
-
-    case Action.UPDATE_SCHEDULE_EVENTS:
-      const events: SchedEvent[] | undefined = request.body.events;
-      if (!events) {
-        throw new Error('Events is undefined');
-      }
-      profileIdx = getProfileIndexFromName(request.body?.profileName);
-      // filter out events without date object, and sort by time
-      const processedEvents = events.filter(event => event.time)
-        .sort((ev1, ev2) => {
-          return getTimeInSecs(ev1.time!) - getTimeInSecs(ev2.time!);
-        });
-      profiles[profileIdx].options.schedule.events = processedEvents;
-      eventScheduler.onProfilesUpdated(profiles);
-      responseBody = profiles[profileIdx];
-      saveProfiles();
-      break;
-
-    case Action.GET_ACTIVE_PROFILES:
-      responseBody = activeProfiles.getList();
-      break;
-  }
-  return responseBody;
-});
+);
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (activeProfiles?.isEmpty() || !(changeInfo.url && tabId && tab)) {
@@ -168,8 +172,8 @@ function init(savedState: any) {
       restoreBlockedTabs();
     }
     event.executed = true;
-    sendAction(Action.NOTIFY_SCHEDULE_TRIGGER).catch((err) => { });
     saveProfiles();
+    sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
   });
 
   eventScheduler.onEventReset(() => {
@@ -180,6 +184,7 @@ function init(savedState: any) {
       });
     });
     saveProfiles();
+    sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
     eventScheduler!.onProfilesUpdated(profiles!);
     // the next time the extension starts, it will compare
     // the time with this saved time to determine whether to reset

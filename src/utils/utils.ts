@@ -15,23 +15,6 @@ export async function sendAction(action: Action, body?: any): Promise<Response> 
   });
 }
 
-export function receiveMessage(handler: (request: Request, sender: chrome.runtime.MessageSender) => Promise<any>): void {
-  chrome.runtime.onMessage.addListener((request: Request, sender, sendResponse) => {
-    const response: Response = {};
-    handler(request, sender)
-      .then(body => {
-        response.body = body;
-        sendResponse(response)
-      })
-      .catch(err => {
-        console.error(err);
-        response.error = { message: err.message };
-        sendResponse(response);
-      });
-    return true;
-  });
-}
-
 export async function getTab(tabId: number): Promise<chrome.tabs.Tab> {
   return new Promise((resolve, reject) => {
     chrome.tabs.get(tabId, tab => {
