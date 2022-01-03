@@ -4,9 +4,17 @@ const FileManagerPlugin = require('filemanager-webpack-plugin');
 const BUILD_DIR = path.resolve(__dirname, 'dist');
 const SRC_DIR = path.resolve(__dirname, 'src');
 
+const copyFiles = [
+  'popup/popup.html',
+  'popup/popup.css',
+  'styles.css',
+  'manifest.json'
+]
+
 module.exports = {
   entry: {
-    'background': './src/core/background.ts'
+    'background': path.join(SRC_DIR, 'core/background.ts'),
+    'popup': path.join(SRC_DIR, 'popup/popup.ts')
   },
   output: {
     filename: '[name].js',
@@ -27,20 +35,10 @@ module.exports = {
     new FileManagerPlugin({
       events: {
         onEnd: {
-          copy: [
-            {
-              source: path.join(SRC_DIR, 'popup/popup.html'),
-              destination: path.join(BUILD_DIR, './'),
-            },
-            {
-              source: path.join(SRC_DIR, 'popup/popup.js'),
-              destination: path.join(BUILD_DIR, './'),
-            },
-            {
-              source: path.join(SRC_DIR, 'manifest.json'),
-              destination: path.join(BUILD_DIR, './'),
-            }
-          ]
+          copy: copyFiles.map(filePath => ({
+            source: path.join(SRC_DIR, filePath),
+            destination: path.join(BUILD_DIR, './'),
+          }))
         }
       }
     })

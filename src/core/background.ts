@@ -20,10 +20,6 @@ chrome.storage.local.get(['profiles', 'lastRecordedDate'], result => {
 
 chrome.runtime.onMessage.addListener(
   (request: Request, sender: chrome.runtime.MessageSender, sendResponse) => {
-    // only accept messages sent from front end
-    if (sender.tab === undefined) {
-      return true;
-    }
 
     const response: Response = {};
     try {

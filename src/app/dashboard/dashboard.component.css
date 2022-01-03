@@ -31,7 +31,6 @@
 }
 
 .logo {
-  display: inline-block;
   font-size: 28px;
   font-weight: 300px;
   display: flex;
@@ -68,7 +67,6 @@
   font-size: 15px;
   color: var(--on-background);
   background: var(--background-secondary);
-  border-radius: 6px;
   display: flex;
   flex-direction: row;
   align-items: center;

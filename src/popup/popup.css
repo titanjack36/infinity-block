@@ -1,0 +1,80 @@
+@import "styles.css";
+
+body {
+  width: 325px;
+  max-height: 501px;
+  background-color: #21252b;
+}
+
+.top {
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.logo {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  background-color: var(--background-6);
+}
+
+.logo img {
+  margin-right: 16px;
+  width: 38px;
+}
+
+.text-btn {
+  padding: 0 10px;
+  height: 38px;
+  font-size: 14px;
+}
+
+.title {
+  margin-left: 20px;
+}
+
+#profileList {
+  overflow-y: auto;
+  height: 450px;
+}
+
+#profileTemplate {
+  display: none;
+}
+
+.profile-item {
+  box-sizing: border-box;
+  font-size: 15px;
+  color: var(--on-background);
+  background: var(--background-secondary);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 48px;
+  cursor: pointer;
+}
+
+.profile-item:hover {
+  background-color: var(--background-secondary-hover);
+} 
+
+.profile-item .status-circle {
+  height: 10px;
+  width: 10px;
+  background-color: var(--disabled);
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-left: 35px;
+}
+
+.profile-item .status-circle.active {
+  background-color: var(--enabled);
+}
+
+.profile-item .name {
+  margin: 0 15px;
+}
