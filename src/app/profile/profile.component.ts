@@ -23,11 +23,10 @@ export class ProfileComponent implements OnInit, OnChanges {
   waitTimeRemaining: number = 0;
   challengeModalOpen: boolean = false;
   allowDisable: boolean = false;
+  showOptions: boolean = true;
 
   constructor(
       private profileService: ProfileService,
-      private router: Router,
-      private cdr: ChangeDetectorRef,
       private ngZone: NgZone) {
     this.waitTimer.attachCallback((timeInSecs: number) => {
       this.waitTimeRemaining = timeInSecs;
@@ -81,12 +80,6 @@ export class ProfileComponent implements OnInit, OnChanges {
     }
   }
 
-  async handleRemoveSite(siteIdx: number): Promise<void> {
-    if (!await this.profileService.removeSite(this.modifiedProfile!, siteIdx)) {
-      this.resetModifiedProfile();
-    }
-  }
-
   async handleUpdateProfile(): Promise<void> {
     const success = await this.profileService.updateProfile(
       this.modifiedProfile!, this.selectedProfile!);
@@ -95,28 +88,9 @@ export class ProfileComponent implements OnInit, OnChanges {
     }
   }
 
-  handleEditName(): void {
-    this.editedProfileName = this.selectedProfile!.name;
-    this.isEditingName = true;
-    setTimeout(() => this.profileNameInput.nativeElement.focus(), 0);
-  }
-
-  async handleSaveEditName(): Promise<void> {
-    const trimmedName = this.editedProfileName.trim();
-    const success = await this.profileService.updateProfileName(
-      this.selectedProfile!, trimmedName);
-    if (success) {
-      this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
-      this.isEditingName = false;
-    }
-  }
-
-  handleCancelEditName(): void {
-    this.isEditingName = false;
-  }
-
   handleToggleEnableProfile(): void {
     const options = this.modifiedProfile!.options
+    this.modifiedProfile!.options.isActive = !options.isActive;
     if (!options.isActive && options.challenge.waitTimeEnabled) {
       this.challengeModalOpen = true;
       this.waitTimeRemaining = options.challenge.waitTime;
@@ -137,5 +111,13 @@ export class ProfileComponent implements OnInit, OnChanges {
   handleHideChallengeModal() {
     this.modifiedProfile!.options.isActive = true;
     this.challengeModalOpen = false;
+  }
+
+  handleShowOptions() {
+    this.showOptions = true;
+  }
+
+  handleHideOptions() {
+    this.showOptions = false;
   }
 }

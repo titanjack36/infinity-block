@@ -1,0 +1,14 @@
+{
+  "blockMode": {
+    "title": "Block Mode Help",
+    "body": "When the profile is enabled and 'Only Block Listed Sites' is selected, any sites listed in the profile will be blocked. If 'Only Allow Listed Sites' is selected, then all sites are blocked except for the sites listed in the profile."
+  },
+  "schedule": {
+    "title": "Schedule Help",
+    "body": "The schedule is used to enable and disable a profile at specific times of the day. Each scheduled event will execute daily when the schedule is turned on."
+  },
+  "challenges": {
+    "title": "Challenges Help",
+    "body": "Make it more difficult to turn off the profile by enabling challenges. Delaying disable means that the user must wait for a set amount of time before they can turn the profile off."
+  }
+}

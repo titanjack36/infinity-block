@@ -1,7 +1,10 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { Component, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import ActiveProfiles from '../../core/active-profile';
 import { ProfileService } from '../profile.service';
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import { sendAction } from 'src/utils/utils';
+import { Action } from 'src/models/message.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,6 +13,8 @@ import { ProfileService } from '../profile.service';
 })
 export class DashboardComponent implements OnInit {
 
+  @ViewChild('selector') selector: any;
+  @ViewChild('newProfileInput') newProfileInput: any;
   profileNames: string[] = [];
   newProfileName: string = '';
   activeProfiles: ActiveProfiles = new ActiveProfiles();
@@ -17,12 +22,12 @@ export class DashboardComponent implements OnInit {
   errorMsg: string = '';
   newProfileModalOpen: boolean = false;
   errorModalOpen: boolean = false;
+  isDragging: boolean = false;
 
   constructor(
     private profileService: ProfileService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef,
     private ngZone: NgZone) { }
 
   async ngOnInit(): Promise<void> {
@@ -74,14 +79,15 @@ export class DashboardComponent implements OnInit {
   async handleAddProfile(): Promise<void> {
     const trimmedName = this.newProfileName.trim();
     if (await this.profileService.addProfile(trimmedName)) {
-      this.newProfileName = '';
       this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
       this.hideNewProfileModal();
+      this.newProfileName = '';
     }
   }
 
   showNewProfileModal(): void {
     this.newProfileModalOpen = true;
+    setTimeout(() => this.newProfileInput.nativeElement.focus(), 0);
   }
 
   hideNewProfileModal(): void {
@@ -96,5 +102,37 @@ export class DashboardComponent implements OnInit {
   hideErrorModal(): void {
     this.errorMsg = '';
     this.errorModalOpen = false;
+  }
+
+  handleSelect(event: any) {
+    if (this.isDragging || !this.selector?.nativeElement || !event?.target) {
+      return;
+    }
+    const targetRect = event.target.getBoundingClientRect();
+    const targetProfileName = event.target.getAttribute('data-profile-name');
+    const selectorElement = this.selector.nativeElement;
+    selectorElement.style.opacity = '1';
+    selectorElement.style.left = `${targetRect.x}px`;
+    selectorElement.style.top = `${targetRect.y}px`;
+    selectorElement.style.height = `${targetRect.height}px`;
+    selectorElement.innerText = targetProfileName;
+  }
+
+  handleDeselect() {
+    if (!this.selector?.nativeElement) {
+      return;
+    }
+    const selectorElement = this.selector.nativeElement;
+    selectorElement.style.opacity = '0';
+  }
+
+  handleDrop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.profileNames, event.previousIndex, event.currentIndex);
+    sendAction(Action.UPDATE_PROFILE_ORDER, this.profileNames);
+  }
+
+  @HostListener('window:mouseup', ['$event'])
+  handleEndDrop() {
+    this.isDragging = false;
   }
 }

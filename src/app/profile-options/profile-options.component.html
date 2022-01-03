@@ -1,56 +1,75 @@
-<div id="profileOptions" *ngIf="selectedProfile && modifiedProfile">
-  <h3 class="options-title">Options</h3>
-  <div class="options-body" *ngIf="!selectedProfile.options.isActive; else optionsDisabled">
-    <div class="blockmode-section">
-      <h3>Block Mode</h3>
+<div class="options" *ngIf="selectedProfile && modifiedProfile">
+  <div class="title">
+    <button class="icon-btn" (click)="onHideOptions.emit()">
+      <img src="assets/hide.svg" alt="Hide Options">
+    </button>
+    <h2>Options</h2>
+    <div class="balancer"></div>
+  </div>
+  <div class="body" *ngIf="!selectedProfile.options.isActive">
+    <div class="name section">
+      <h3>Name</h3>
+      <div>
+        <input type="text" class="textfield" [(ngModel)]="modifiedProfile.name">
+        <button *ngIf="nameChanged" class="text-btn secondary"
+          (click)="handleUpdateProfileName()">Apply</button>
+      </div>
+    </div>
+    <div class="blockmode section">
+      <h3>Block Mode<button class="icon-btn" (click)="selectedHelp='blockMode'">
+        <img src="assets/help.svg"></button></h3>
       <div class="blockmode-choices">
         <input type="radio" id="useBlockSites" [value]="BlockMode.BLOCK_SITES"
             [(ngModel)]="modifiedProfile.options.blockMode" (change)="handleUpdateProfile()">
         <label for="useBlockSites">
           Only Block Listed Sites
-          <img src="assets/confirm-icon.svg">
+          <img src="assets/checkmark.svg">
         </label>
         <input type="radio" id="useAllowSites" [value]="BlockMode.ALLOW_SITES"
             [(ngModel)]="modifiedProfile.options.blockMode" (change)="handleUpdateProfile()">
         <label for="useAllowSites">
           Only Allow Listed Sites
-          <img src="assets/confirm-icon.svg">
+          <img src="assets/checkmark.svg">
         </label>
       </div>
     </div>
-    <div class="schedule-section" *ngIf="schedule">
+    <div class="schedule section" *ngIf="schedule">
       <div class="title-with-toggle">
-        <h3>Schedule</h3>
+        <h3>Schedule<button class="icon-btn" (click)="selectedHelp='schedule'">
+          <img src="assets/help.svg"></button></h3>
         <label class="toggle-switch small">
           <input type="checkbox" [(ngModel)]="schedule!.isEnabled"
               (change)="handleUpdateProfile()">
           <span class="slider"></span>
         </label>
       </div>
-      <div class="sched-event-container"
-          *ngFor="let event of schedule!.events; let idx = index">
-        <div class="sched-event">
-          <app-select-menu [options]="schedEventTypeOptions"
-            [(selectedValue)]="event.eventType" (onSelection)="handleUpdateSchedEvents()">
-          </app-select-menu>
-          <p>at</p>
-          <input type="text" class="date-input textfield" placeholder="10:30am"
-            [(ngModel)]="event.timeStr" (focusout)="handleUpdateSchedEvents()">
-          <button class="icon-btn" id="removeEventBtn" (click)="handleRemoveSchedEvent(idx)">
-            <img src="assets/close.svg" alt="Delete">
-          </button>
+      <div *ngIf="schedule!.isEnabled" class="sched-event-list">
+        <div class="sched-event-container"
+            *ngFor="let event of schedule!.events; let idx = index">
+          <div class="sched-event">
+            <app-select-menu [options]="schedEventTypeOptions"
+              [(selectedValue)]="event.eventType" (onSelection)="handleUpdateSchedEvents()">
+            </app-select-menu>
+            <p>at</p>
+            <input type="text" class="date-input textfield" placeholder="10:30am"
+              [(ngModel)]="event.timeStr" (focusout)="handleUpdateSchedEvents()">
+            <button class="icon-btn" id="removeEventBtn" (click)="handleRemoveSchedEvent(idx)">
+              <img src="assets/close.svg" alt="Delete">
+            </button>
+          </div>
+          <div class="sched-event-error">{{ eventErrors[idx] }}</div>
         </div>
-        <div class="sched-event-error">{{ eventErrors[idx] }}</div>
+        <button class="text-btn" id="addEventBtn" (click)="handleAddSchedEvent()">
+          Add Event
+        </button>
       </div>
-      <button class="text-btn" id="addEventBtn" (click)="handleAddSchedEvent()">
-        Add Event
-      </button>
     </div>
-    <div class="challenge-section" *ngIf="challenge">
-      <h3>Challenges</h3>
+    <div class="challenge section" *ngIf="challenge">
+      <h3>Challenges<button class="icon-btn" (click)="selectedHelp='challenges'">
+        <img src="assets/help.svg"></button></h3>
       <div class="title-with-toggle">
         <div>
-          Wait for
+          Delay disable for
           <input type="text" class="wait-time-input textfield"
               [(ngModel)]="challenge.waitTime">
           seconds
@@ -62,31 +81,40 @@
         </label>
       </div>
     </div>
-    <div class="action-section">
+    <div class="action section">
       <h3>Actions</h3>
-      <a id="exportBtn" class="text-btn" [download]="exportFileName" [href]="exportHref">
+      <a id="exportBtn" class="text-btn secondary" [download]="exportFileName" [href]="exportHref">
         Export Sites
       </a>
-      <div class="text-btn file-upload" for="file">
+      <div class="text-btn secondary file-upload" for="file">
         <input type="file" (change)="handleImportSites($event)">
         <p>Import Sites</p>
       </div>
-      <button id="deleteProfileBtn" class="text-btn" (click)="showConfirmDeleteModal()">
+      <button id="deleteProfileBtn" class="text-btn secondary danger" (click)="showConfirmDeleteModal()">
         Delete Profile
       </button>
     </div>
   </div>
-  <ng-template #optionsDisabled>
-    Options are not availabe while the profile is active.
-  </ng-template>
+</div>
+<div *ngIf="selectedProfile?.options?.isActive" class="disabled-prompt">
+  <img src="assets/blocked.svg" alt="Blocked">
+  Options are not available while profile is enabled.
 </div>
 
 <app-modal id="confirmDeleteModal" [showModal]="confirmDeleteModalOpen"
     (onHideModal)="hideConfirmDeleteModal()">
-  <h1 class="title">Confirm Delete</h1>
+  <h2 class="title">Confirm Delete</h2>
   <p class="body">Are you sure you want to delete <b>{{ selectedProfile?.name }}</b>?</p>
   <div class="btn-group">
-    <button class="text-btn" (click)="hideConfirmDeleteModal()">No</button>
-    <button class="text-btn" (click)="handleRemoveProfile()">Yes</button>
+    <button class="text-btn secondary" (click)="hideConfirmDeleteModal()">No</button>
+    <button class="text-btn danger" (click)="handleRemoveProfile()">Yes</button>
+  </div>
+</app-modal>
+
+<app-modal id="helpModal" [showModal]="!!selectedHelp" (onHideModal)="hideHelpModal()">
+  <h2 class="title">{{ helpContent.title }}</h2>
+  <p class="body">{{ helpContent.body }}</p>
+  <div class="btn-group">
+    <button class="text-btn secondary" (click)="hideHelpModal()">OK</button>
   </div>
 </app-modal>

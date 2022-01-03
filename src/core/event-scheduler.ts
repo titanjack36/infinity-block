@@ -65,7 +65,8 @@ export default class EventScheduler {
   async checkSchedEvents(): Promise<void> {
     const unexecutedEvents = [];
     for (const event of this.pendingSchedEvents) {
-      if (this.eventHandler && getTimeInSecs(event.time!) < getTimeInSecs(new Date())) {
+      if (this.eventHandler 
+          && getTimeInSecs(event.time!) < getTimeInSecs(new Date().toString())) {
         try {
           this.eventHandler(event);
         } catch (err) {

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { BlockMode, Profile } from '../models/profile.interface';
+import { BlockMode, Profile, Site } from '../models/profile.interface';
 import { sendAction } from '../utils/utils';
 import { Action, Response, Request } from '../models/message.interface';
 
@@ -132,7 +132,11 @@ export class ProfileService {
       return false;
     }
     const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
-    modifiedProfile.sites.push({ url: siteUrl, useRegex: false });
+    modifiedProfile.sites.push({
+      url: siteUrl,
+      useRegex: false,
+      dateCreated: new Date().toString()
+    });
     return this.updateProfile(modifiedProfile, profile);
   }
 
@@ -142,22 +146,26 @@ export class ProfileService {
    * @param siteIdx the list index of the site to be removed
    * @returns whether the site was successfully removed from the profile site list
    */
-  async removeSite(profile: Profile, siteIdx: number): Promise<boolean> {
+  async removeSite(profile: Profile, site: Site): Promise<boolean> {
     const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
-    modifiedProfile.sites.splice(siteIdx, 1);
+    modifiedProfile.sites = profile.sites.filter(s => s.url !== site.url);
     return await this.updateProfile(modifiedProfile, profile);
   }
 
   /**
    * @param modifiedProfile the profile with modifications
    * @param origProfile the profile before modifications
+   * @param doNotNotify if true, background will not notify others that 
+   * the profie was updated
    * @returns whether the profile was successfully updated with modifications
    */
-  async updateProfile(modifiedProfile: Profile, origProfile: Profile): Promise<boolean> {
+  async updateProfile(modifiedProfile: Profile, origProfile: Profile, 
+      doNotNotify: boolean = false): Promise<boolean> {
     const response: Response = await sendAction(Action.UPDATE_PROFILE, {
       profileName: origProfile.name,
       profile: modifiedProfile,
-      origProfile: origProfile
+      origProfile: origProfile,
+      doNotNotify
     });
     if (response.error) {
       this.error.next(`Failed to update profile: ${response.error.message}`);

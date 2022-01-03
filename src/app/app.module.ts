@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -11,6 +12,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { ModalComponent } from './modal/modal.component';
 import { SelectMenuComponent } from './select-menu/select-menu.component';
 import { ProfileOptionsComponent } from './profile-options/profile-options.component';
+import { SiteListComponent } from './site-list/site-list.component';
 
 @NgModule({
   declarations: [
@@ -20,12 +22,14 @@ import { ProfileOptionsComponent } from './profile-options/profile-options.compo
     ProfileComponent,
     ModalComponent,
     SelectMenuComponent,
-    ProfileOptionsComponent
+    ProfileOptionsComponent,
+    SiteListComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    DragDropModule
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },

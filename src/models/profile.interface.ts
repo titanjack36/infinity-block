@@ -18,6 +18,7 @@ export interface Site {
   url: string;
   useRegex: boolean;
   redirectUrl?: string;
+  dateCreated?: string;
 }
 
 export interface Options {
@@ -35,7 +36,7 @@ export interface Schedule {
 export interface SchedEvent {
   profileName: string;
   eventType: SchedEventType;
-  time?: Date;
+  time?: string;
   timeStr: string;
   executed: boolean;
 }

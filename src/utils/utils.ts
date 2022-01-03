@@ -50,7 +50,7 @@ export function isValidUrl(str: string): boolean {
   return !!pattern.test(str);
 }
 
-export function parseTime(timeStr: string | undefined): Date | undefined {
+export function parseTime(timeStr: string | undefined): string | undefined {
   if (!timeStr) {
     return undefined;
   }
@@ -64,10 +64,10 @@ export function parseTime(timeStr: string | undefined): Date | undefined {
   date = setHours(date, parseInt(hours) + (ampm == 'am' ? 0 : 12));
   date = setMinutes(date, parseInt(minutes));
   date = setSeconds(date, 0);
-  return date;
+  return date.toString();
 }
 
-export function getTimeInSecs(time: Date) {
+export function getTimeInSecs(time: string) {
   const date = new Date(time);
   return date.getHours() * 3600 + date.getMinutes() * 60;
 }

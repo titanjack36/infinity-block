@@ -1,11 +1,12 @@
-import { ChangeDetectorRef, Component, Input, NgZone, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import format from 'date-fns/format';
 import { getTimeInSecs, parseTime } from 'src/utils/utils';
 import { BlockMode, Challenge, Profile, SchedEventType, Schedule } from '../../models/profile.interface';
 import { ProfileService } from '../profile.service';
-import { Option} from '../select-menu/select-menu.component';
+import { Option } from '../select-menu/select-menu.component';
+import helpData from '../../data/help.json';
 
 @Component({
   selector: 'app-profile-options',
@@ -15,12 +16,13 @@ import { Option} from '../select-menu/select-menu.component';
 export class ProfileOptionsComponent implements OnInit, OnChanges {
 
   @Input() selectedProfileName!: string;
+  @Output() onHideOptions = new EventEmitter<void>();
   _selectedProfile: Profile | undefined;
   modifiedProfile: Profile | undefined;
   confirmDeleteModalOpen: boolean = false;
+  selectedHelp: keyof typeof helpData | undefined;
   exportHref: SafeUrl = '';
 
-  challenge: Challenge | undefined;
   eventErrors: string[] = [];
   schedEventTypeOptions: Option[] = [
     { value: SchedEventType.ENABLE, description: 'Enable' },
@@ -31,7 +33,6 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     private router: Router,
     private profileService: ProfileService,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef,
     private ngZone: NgZone) { }
 
   set selectedProfile(profile: Profile | undefined) {
@@ -47,12 +48,27 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     return this.modifiedProfile?.options.schedule;
   }
 
+  get challenge(): Challenge | undefined {
+    return this.modifiedProfile?.options.challenge;
+  }
+
   get BlockMode() {
     return BlockMode;
   }
 
   get exportFileName(): string {
     return `block_sites_${this.selectedProfile!.name}.json`;
+  }
+
+  get nameChanged(): boolean {
+    return this.selectedProfile!.name !== this.modifiedProfile!.name;
+  }
+
+  get helpContent(): any {
+    if (!this.selectedHelp || !helpData[this.selectedHelp]) {
+      return { title: '', body: '' };
+    }
+    return helpData[this.selectedHelp];
   }
 
   async ngOnChanges(changes: SimpleChanges) {
@@ -92,6 +108,15 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     }
   }
 
+  async handleUpdateProfileName(): Promise<void> {
+    const trimmedName = this.modifiedProfile!.name.trim();
+    const success = await this.profileService.updateProfileName(
+      this.selectedProfile!, trimmedName);
+    if (success) {
+      this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
+    }
+  }
+
   async handleRemoveProfile(): Promise<void> {
     if (await this.profileService.removeProfile(this.selectedProfile!)) {
       this.hideConfirmDeleteModal();
@@ -116,26 +141,37 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
   }
 
   handleUpdateSchedEvents(): void {
+    let hasErrors = false;
     // convert inputted date strings to date objects
     const processedEvents = this.schedule!.events.map((event, idx) => {
-      const time = parseTime(event.timeStr);
+      const parsedTime = parseTime(event.timeStr);
+      let formattedTime;
+      let executed = false;
       if (!event.timeStr) {
         this.eventErrors[idx] = 'Time cannot be left empty.';
-      } else if (!time) {
+        formattedTime = event.timeStr;
+        hasErrors = true;
+      } else if (!parsedTime) {
         this.eventErrors[idx] = 'Invalid time format.';
+        formattedTime = event.timeStr;
+        hasErrors = true;
       } else {
         this.eventErrors[idx] = '';
+        formattedTime = format(new Date(parsedTime), "hh:mmaaaaa'm'");
+        executed = getTimeInSecs(parsedTime) < getTimeInSecs(new Date().toString());
       }
       return {
         profileName: event.profileName,
         eventType: event.eventType,
-        time,
-        timeStr: time ? format(time, "hh:mmaaaaa'm'") : event.timeStr,
-        executed: !!(time && getTimeInSecs(time) < getTimeInSecs(new Date()))
+        time: parsedTime,
+        timeStr: formattedTime,
+        executed
       };
     });
     this.modifiedProfile!.options.schedule.events = processedEvents;
-    this.profileService.updateProfile(this.modifiedProfile!, this.selectedProfile!);
+    const shouldNotNotify = hasErrors;
+    this.profileService.updateProfile(
+      this.modifiedProfile!, this.selectedProfile!, shouldNotNotify);
   }
 
   showConfirmDeleteModal(): void {
@@ -168,5 +204,9 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     } catch (err: any) {
       this.profileService.broadcastError(`Failed to parse file: ${err.message}`);
     }
+  }
+
+  hideHelpModal(): void {
+    this.selectedHelp = undefined;
   }
 }

@@ -77,12 +77,11 @@ chrome.runtime.onMessage.addListener(
           restoreBlockedTabs();
           blockTabsMatchingActive();
           saveProfiles();
-          sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
+          const shouldNotify = !request.body.doNotNotify;
+          if (shouldNotify) {
+            sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
+          }
           break;
-    
-        // case Action.GET_PROFILE_NAMES:
-        //   responseBody = profiles.map(profile => profile.name);
-        //   break;
     
         case Action.ADD_PROFILE:
           if (!request.body) {
@@ -106,6 +105,23 @@ chrome.runtime.onMessage.addListener(
     
         case Action.GET_PROFILES:
           responseBody = profiles;
+          break;
+
+        case Action.UPDATE_PROFILE_ORDER:
+          const newOrderNames: string[] = request.body;
+          if (!newOrderNames || newOrderNames.length !== profiles.length) {
+            throw new Error('invalid profile ordering');
+          }
+          let newProfilesOrdering = [];
+          for (let profileName of newOrderNames) {
+            const matchingProfile = profiles.find(p => p.name === profileName);
+            if (!matchingProfile) {
+              throw new Error('invalid profile ordering');
+            }
+            newProfilesOrdering.push(matchingProfile);
+          }
+          profiles = newProfilesOrdering;
+          saveProfiles();
           break;
       }
       response.body = responseBody;

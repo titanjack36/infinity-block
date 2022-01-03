@@ -1,17 +1,102 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global stylesheet */
+
+:root {
+  --background-primary: #292e38;
+  --background-secondary: #21252b;
+  --background-3: #3a414b;
+  --background-4: #2f3748;
+  --background-5: #2b3343;
+  --background-6: #171a1f;
+  --background-secondary-hover: #54575c;
+  --background-3-hover: #ffffff1f;
+  --primary: #165ae4;
+  --primary-hover: #3d7eff;
+  --secondary: #dfdfdf;
+  --danger: #c51818;
+  --disabled: #a0a0a0;
+  --placeholder: #8d8d8d;
+  --scrollbar: #cbcbcb;
+  --enabled: #25c225;
+  --scrollbar-hover: #999999;
+  --scrollbar-click: #5c5c5c;
+  --on-background: #dfdfdf;
+  --on-background-muted: #cbcbcb;
+  --on-background-extra-muted: #434e66;
+  --on-primary: #dfdfdf;
+  --on-secondary: #14213d;
+  --on-danger: #14213d;
+  --on-disabled: #14213d;
+  --on-enabled: #14213d;
+}
+
+
+
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #282c34;
-  color: #f2f2f2;
+  background-color: var(--background-primary);
+  color: var(--on-background);
+  font-family: 'Roboto', sans-serif;
+}
+
+
+
+*::-webkit-scrollbar {
+  width: 15px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--background-3);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--on-background-muted);
+  border-radius: 20px;
+  border: 3px solid var(--background-3);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-hover)
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-click);
+}
+
+
+
+h1 {
+  font-weight: 500;
+  font-size: 48px;
+}
+
+h2, h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.75px;
+}
+
+h2 {
+  color: var(--on-background);
+  font-size: 22px;
+  font-weight: bold;
+}
+
+h3 {
+  color: var(--on-background-muted);
+  font-size: 15px;
+  font-weight: 500;
 }
 
 
 
 .icon-btn {
   background: none;
-  background-color: none;
+  background: none;
   border: none;
   display: flex;
   justify-content: center;
@@ -23,45 +108,64 @@ body {
 }
 
 .icon-btn img {
-  transition: all 0.25s ease-in-out;
+  transition: transform 0.25s ease-in-out;
 }
 
 .icon-btn:hover img {
   transform: scale(1.2);
 }
 
-.icon-btn:active img {
-  transition: all 0.05s ease-in-out;
-  transform: scale(1);
-}
-
 
 
 .text-btn {
-  background: none;
-  border: 2px solid #f2f2f2;
+  border: none;
+  background: var(--primary);
   border-radius: 6px;
-  color: #f2f2f2;
+  color: var(--on-primary);
   font-weight: bold;
   font-size: 15px;
-  padding: 10px;
+  padding: 0 15px;
+  height: 43px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.text-btn.secondary {
+  border: 2px solid var(--secondary);
+  background: none;
+  color: var(--secondary);
+}
+
+.text-btn.danger {
+  border: 2px solid var(--danger);
+  background: none;
+  color: var(--danger);
 }
 
 .text-btn:hover {
   cursor: pointer;
-  background-color: #ffffff33;
+  background: var(--primary-hover);
+}
+
+.text-btn.secondary:hover {
+  color: var(--on-secondary);
+  background: var(--secondary);
+}
+
+.text-btn.danger:hover {
+  background-color: var(--danger);
+  color: var(--on-danger);
 }
 
 .text-btn:disabled {
-  color: #a0a0a0;
-  border-color: #a0a0a0;
+  color: var(--disabled);
+  border-color: var(--disabled);
   cursor: not-allowed;
 }
 
 a.text-btn {
   box-sizing: border-box;
-  display: block;
-  text-align: center;
   text-decoration: inherit;
   color: inherit;
   cursor: pointer;
@@ -75,16 +179,18 @@ a.text-btn:visited {
 
 .textfield {
   background: none;
-  border: none;
-  border-bottom: 2px solid #f2f2f2;
-  border-left: 3px solid transparent;
-  border-right: 3px solid transparent;
-  color: #f2f2f2;
-  background-color: #ffffff15;
+  border: 0.3px solid var(--on-background-muted);
+  color: var(--on-background);
   font-family: inherit;
   border-radius: 6px;
+  font-size: 13px;
+  height: 43px;
+  padding: 10px;
 }
 
+.textfield::placeholder {
+  color: var(--placeholder);
+}
 
 
 app-modal .btn-group {
@@ -125,7 +231,7 @@ app-modal .body {
 }
 
 .toggle-switch > .slider {
-  background-color: #535353;
+  background-color: var(--background-3);
   border-radius: 6px;
   position: absolute;
   top: 0;
@@ -143,9 +249,9 @@ app-modal .body {
   left: 4px;
   width: 45px;
   height: 32px;
-  background-color: #ffffff;
+  background-color: var(--secondary);
   border-radius: 4px;
-  color: #535353;
+  color: var(--background-3);
   font-weight: bold;
   
   display: flex;
@@ -161,11 +267,19 @@ app-modal .body {
 }
 
 .toggle-switch > input:checked + .slider {
-  background-color: #25c225;
+  background-color: var(--enabled);
 }
 
 .toggle-switch > input:checked + .slider::before {
   content: "On";
-  color: #25c225;
+  color: var(--enabled);
   transform: translateX(22px);
+}
+
+
+
+.overflowable {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
