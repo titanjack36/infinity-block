@@ -22,9 +22,10 @@ export class ProfileService {
    */
   constructor() {
     chrome.runtime.onMessage.addListener(
-      (request: Request, sender: chrome.runtime.MessageSender, _) => {
+      (request: Request, sender: chrome.runtime.MessageSender, sendResponse) => {
         // only accept messages from back end
         if (sender.tab !== undefined) {
+          sendResponse();
           return true;
         }
 
@@ -32,6 +33,7 @@ export class ProfileService {
           this._profiles = request.body;
           this.profilesUpdated.next(this._profiles);
         }
+        sendResponse();
         return true;
       }
     );
