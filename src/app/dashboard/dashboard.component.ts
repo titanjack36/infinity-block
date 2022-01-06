@@ -5,6 +5,8 @@ import { ProfileService } from '../profile.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import { sendAction } from 'src/utils/utils';
 import { Action } from 'src/models/message.interface';
+import manifest from '../../manifest.json';
+import config from '../../data/config.json';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,6 +31,14 @@ export class DashboardComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private ngZone: NgZone) { }
+
+  get version() {
+    return manifest['version'] || 'unknown';
+  }
+
+  get reportFormUrl() {
+    return `${config['reportFormUrl']}${this.version}`;
+  }
 
   async ngOnInit(): Promise<void> {
     const profiles = await this.profileService.getProfiles();

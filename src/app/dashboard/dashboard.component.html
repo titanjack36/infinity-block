@@ -34,10 +34,12 @@
     </button>
   </div>
   <div class="bottom">
-    <a class="text-btn secondary" href="https://github.com/titanjack36/infinity-block/issues/new" 
+    <a class="text-btn secondary" 
+        [href]="reportFormUrl" 
         target="_blank" rel="noopener noreferrer">
       Report a Problem
     </a>
+    <div class="version">Version {{version}}</div>
   </div>
 </div>
 <app-profile *ngIf="selectedProfileName; else showPrompt" 
