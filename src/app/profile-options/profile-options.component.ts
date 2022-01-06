@@ -140,6 +140,16 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     this.handleUpdateSchedEvents();
   }
 
+  handleToggleSchedule(): void {
+    if (this.schedule!.isEnabled) {
+      this.schedule!.events.filter(event => event.time).forEach(event => {
+        event.executed = 
+          getTimeInSecs(event.time!) < getTimeInSecs(new Date().toString());
+      });
+    }
+    this.handleUpdateProfile();
+  }
+
   handleUpdateSchedEvents(): void {
     let hasErrors = false;
     // convert inputted date strings to date objects
