@@ -43,11 +43,7 @@ module.exports = {
       }
     })
   ],
-  mode: 'development',
-  optimization: {
-    minimize: false
-  },
-  devtool : 'source-map',
+  mode: 'production',
   watchOptions: {
     ignored: /node_modules/,
   }

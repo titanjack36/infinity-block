@@ -7,6 +7,7 @@
     "build": "npm run ngbuild && npm run wpbuild",
     "ngbuild": "ng build",
     "wpbuild": "npx webpack --config webpack.config.js",
+    "wpbuildprod": "npx webpack --config prod.webpack.config.js",
     "ngbuild:w": "npm run ngbuild -- --watch --configuration development",
     "wpbuild:w": "npm run wpbuild -- --watch",
     "test": "ng test"

@@ -20,7 +20,7 @@
       {{ getElapsedTime(site.dateCreated) }}
     </div>
     <div class="cell action-group">
-      <label class="regex-toggle icon-btn" [title]="site.useRegex ? 'Disable Regex' : 'Enable Regex'">
+      <label class="regex-toggle icon-btn" [title]="site.useRegex ? 'Disable Regex Matching' : 'Enable Regex Matching'">
         <img 
           [src]="site.useRegex ? 'assets/regex-enabled.svg' : 'assets/regex-disabled.svg'"
           [alt]="site.useRegex ? 'Disable Regex' : 'Enable Regex'">
