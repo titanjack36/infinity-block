@@ -21,7 +21,6 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
   modifiedProfile: Profile | undefined;
   confirmDeleteModalOpen: boolean = false;
   selectedHelp: keyof typeof helpData | undefined;
-  exportHref: SafeUrl = '';
 
   eventErrors: string[] = [];
   schedEventTypeOptions: Option[] = [
@@ -75,7 +74,6 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     if (changes.selectedProfileName) {
       const profiles = await this.profileService.getProfiles();
       this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-      this.updateExportHref();
     }
   }
 
@@ -87,7 +85,6 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
         }
   
         this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-        this.updateExportHref();
       });
     });
   }
@@ -192,14 +189,15 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     this.confirmDeleteModalOpen = false;
   }
 
-  updateExportHref(): void {
-    if (!this.selectedProfile) {
-      return;
-    }
-    const sitesJson = JSON.stringify(this.selectedProfile.sites);
-    this.exportHref = this.sanitizer.bypassSecurityTrustUrl(
-      `data:text/json;charset=UTF-8,${encodeURIComponent(sitesJson)}`
+  getDownloadHref(dataToDownload: any): SafeUrl {
+    const dataStr = JSON.stringify(dataToDownload);
+    return this.sanitizer.bypassSecurityTrustUrl(
+      `data:text/json;charset=UTF-8,${encodeURIComponent(dataStr)}`
     );
+  }
+
+  getDownloadName(postfix: string) {
+    return `infinityblock_${this.selectedProfile!.name}_${postfix}.json`;
   }
 
   async handleImportSites(event: any): Promise<void> {

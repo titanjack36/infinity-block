@@ -83,7 +83,12 @@
     </div>
     <div class="action section">
       <h3>Actions</h3>
-      <a id="exportBtn" class="text-btn secondary" [download]="exportFileName" [href]="exportHref">
+      <a class="text-btn secondary" [download]="getDownloadName('profile')"
+          [href]="getDownloadHref(selectedProfile)">
+        Export Profile
+      </a>
+      <a class="text-btn secondary" [download]="getDownloadName('block_list')"
+          [href]="getDownloadHref(selectedProfile.sites)">
         Export Sites
       </a>
       <div class="text-btn secondary file-upload" for="file">
