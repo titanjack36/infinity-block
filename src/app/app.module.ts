@@ -8,11 +8,11 @@ import { AppComponent } from './app.component';
 import { BlockPageComponent } from './block-page/block-page.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
-import { ProfileComponent } from './profile/profile.component';
+import { ProfileComponent } from './dashboard/profile/profile.component';
 import { ModalComponent } from './modal/modal.component';
 import { SelectMenuComponent } from './select-menu/select-menu.component';
-import { ProfileOptionsComponent } from './profile-options/profile-options.component';
-import { SiteListComponent } from './site-list/site-list.component';
+import { ProfileOptionsComponent } from './dashboard/profile-options/profile-options.component';
+import { SiteListComponent } from './dashboard/site-list/site-list.component';
 
 @NgModule({
   declarations: [

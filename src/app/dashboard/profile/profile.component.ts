@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import Timer from 'src/utils/timer';
-import { Profile } from '../../models/profile.interface';
-import { ProfileService } from '../profile.service';
+import { Profile } from '../../../models/profile.interface';
+import { ProfileService } from '../../profile.service';
 
 @Component({
   selector: 'app-profile',

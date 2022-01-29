@@ -3,10 +3,10 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import format from 'date-fns/format';
 import { getTimeInSecs, parseTime } from 'src/utils/utils';
-import { BlockMode, Challenge, Profile, SchedEventType, Schedule } from '../../models/profile.interface';
-import { ProfileService } from '../profile.service';
-import { Option } from '../select-menu/select-menu.component';
-import helpData from '../../data/help.json';
+import { BlockMode, Challenge, Profile, SchedEventType, Schedule } from '../../../models/profile.interface';
+import { ProfileService } from '../../profile.service';
+import { Option } from '../../select-menu/select-menu.component';
+import helpData from '../../../data/help.json';
 
 @Component({
   selector: 'app-profile-options',

@@ -1,7 +1,7 @@
 import { Component, Input, NgZone, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Profile, Site } from '../../models/profile.interface';
-import { ProfileService } from '../profile.service';
+import { Profile, Site } from '../../../models/profile.interface';
+import { ProfileService } from '../../profile.service';
 
 @Component({
   selector: 'app-site-list',
