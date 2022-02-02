@@ -1172,6 +1172,20 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
+"@ngrx/effects@^13.0.2":
+  version "13.0.2"
+  resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-13.0.2.tgz#785e54459efaef70ed3754a33d9f4ddd0ff9f033"
+  integrity sha512-7yW/KCxlRatDkdEriSnORlOYX8+1QAWEjPulNmHSPwehkzTQ3fIPfRBQy8xP8bnjwvGxnEZNwQlU4q1KVYOfhg==
+  dependencies:
+    tslib "^2.0.0"
+
+"@ngrx/store@^13.0.2":
+  version "13.0.2"
+  resolved "https://registry.yarnpkg.com/@ngrx/store/-/store-13.0.2.tgz#43f187956e07f33baed3e6215cd2fc59a06e9789"
+  integrity sha512-F7tsc3oCvKh+62MKiXTrvSeaxR41u4p8bch3BLjz12F37376rMuBnXf+V1thsPTZ6RB6aycAi821EQYVXFCXZg==
+  dependencies:
+    tslib "^2.0.0"
+
 "@ngtools/webpack@12.2.1":
   version "12.2.1"
   resolved "https://registry.npmjs.org/@ngtools/webpack/-/webpack-12.2.1.tgz"
@@ -5307,6 +5321,13 @@ nested-error-stacks@^2.0.0, nested-error-stacks@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/nested-error-stacks/-/nested-error-stacks-2.1.0.tgz"
   integrity sha512-AO81vsIO1k1sM4Zrd6Hu7regmJN1NSiAja10gc4bX3F0wd+9rQmcuHQaHVQCYIEC8iFXnE+mavh23GOt7wBgug==
+
+ngx-rxjs-zone-scheduler@^13.0.3:
+  version "13.0.3"
+  resolved "https://registry.yarnpkg.com/ngx-rxjs-zone-scheduler/-/ngx-rxjs-zone-scheduler-13.0.3.tgz#0d05d579b3e41c955918e046ddf5156523922b07"
+  integrity sha512-JJvZjv0Vf3j1JqitdCqrr2rnSiNk31HPuRpPFNH3674Rab/z1r3oqefFeBB2cCkrdJh5QP1niCtF40/AaYk/iw==
+  dependencies:
+    tslib "^2.3.0"
 
 nice-napi@^1.0.2:
   version "1.0.2"

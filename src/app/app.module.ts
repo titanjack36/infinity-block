@@ -4,6 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { AppRoutingModule } from './app-routing.module';
+
+import { RxNgZoneSchedulerModule } from 'ngx-rxjs-zone-scheduler';
+
+import { profilesReducer } from './state/profiles/profiles.reducer';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { ProfilesEffects } from './state/profiles/profiles.effects';
+
 import { AppComponent } from './app.component';
 import { BlockPageComponent } from './block-page/block-page.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -29,7 +37,10 @@ import { SiteListComponent } from './dashboard/site-list/site-list.component';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    DragDropModule
+    DragDropModule,
+    StoreModule.forRoot({ profilesState: profilesReducer }),
+    EffectsModule.forRoot([ProfilesEffects]),
+    RxNgZoneSchedulerModule
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },

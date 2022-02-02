@@ -71,3 +71,13 @@ export function getTimeInSecs(time: string) {
   const date = new Date(time);
   return date.getHours() * 3600 + date.getMinutes() * 60;
 }
+
+export function deepCopy(obj: any) {
+  if (obj === undefined) {
+    return undefined;
+  } else if (obj === null) {
+    return null;
+  } else {
+    return JSON.parse(JSON.stringify(obj));
+  }
+}

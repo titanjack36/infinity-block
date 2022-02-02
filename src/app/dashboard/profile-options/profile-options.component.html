@@ -110,7 +110,7 @@
     (onHideModal)="hideConfirmDeleteModal()">
   <h2 class="title">Confirm Delete</h2>
   <p class="body">Are you sure you want to delete <b>{{ selectedProfile?.name }}</b>?</p>
-  <div class="btn-group">
+  <div class="actions btn-group right">
     <button class="text-btn secondary" (click)="hideConfirmDeleteModal()">No</button>
     <button class="text-btn danger" (click)="handleRemoveProfile()">Yes</button>
   </div>
@@ -119,7 +119,7 @@
 <app-modal id="helpModal" [showModal]="!!selectedHelp" (onHideModal)="hideHelpModal()">
   <h2 class="title">{{ helpContent.title }}</h2>
   <p class="body">{{ helpContent.body }}</p>
-  <div class="btn-group">
+  <div class="actions btn-group right">
     <button class="text-btn secondary" (click)="hideHelpModal()">OK</button>
   </div>
 </app-modal>

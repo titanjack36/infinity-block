@@ -23,7 +23,10 @@
     "@angular/platform-browser": "~12.2.0",
     "@angular/platform-browser-dynamic": "~12.2.0",
     "@angular/router": "~12.2.0",
+    "@ngrx/effects": "^13.0.2",
+    "@ngrx/store": "^13.0.2",
     "date-fns": "^2.23.0",
+    "ngx-rxjs-zone-scheduler": "^13.0.3",
     "rxjs": "~6.6.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"

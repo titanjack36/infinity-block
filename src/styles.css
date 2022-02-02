@@ -193,14 +193,49 @@ a.text-btn:visited {
 }
 
 
-app-modal .btn-group {
+
+.file-upload {
+  display: block;
+  position: relative;
+  padding: 0px;
+}
+
+.file-upload > input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-upload > p {
+  margin: 0;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+
+
+app-modal .actions {
   margin-top: 20px;
+}
+
+app-modal .btn-group {
   display: flex;
   flex-direction: row;
+}
+
+app-modal .btn-group.right {
   justify-content: flex-end;
 }
 
-app-modal .btn-group button:first-child {
+app-modal .btn-group.ends {
+  justify-content: space-between;
+}
+
+app-modal .btn-group button:not(:last-child) {
   margin-right: 10px;
 }
 

@@ -145,11 +145,11 @@
 } */
 
 #newProfileModal .textfield {
-  width: 300px;
+  width: 350px;
 }
 
 #errorModal {
-  z-index: 1100;
+  z-index: 1101;
 }
 
 #errorModal button {

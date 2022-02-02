@@ -168,29 +168,6 @@ app-select-menu {
   margin-bottom: 10px;
 }
 
-.file-upload {
-  display: block;
-  margin-top: 10px;
-  position: relative;
-  padding: 0px;
-}
-
-.file-upload > input {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.file-upload > p {
-  margin: 0;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  cursor: pointer;
-}
-
 .wait-time-input {
   font-size: 15px;
   padding: 10px;

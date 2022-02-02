@@ -1,5 +1,8 @@
-import { Component, Input, NgZone, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { format, formatDistanceToNow } from 'date-fns';
+import { selectSelectedProfile } from 'src/app/state/profiles/profiles.selector';
+import { deepCopy } from 'src/utils/utils';
 import { Profile, Site } from '../../../models/profile.interface';
 import { ProfileService } from '../../profile.service';
 
@@ -8,10 +11,10 @@ import { ProfileService } from '../../profile.service';
   templateUrl: './site-list.component.html',
   styleUrls: ['./site-list.component.css']
 })
-export class SiteListComponent implements OnInit, OnChanges {
+export class SiteListComponent implements OnInit {
 
   @Input() selectedProfileName!: string;
-  _selectedProfile: Profile | undefined;
+  selectedProfile: Profile | undefined;
   modifiedProfile: Profile | undefined;
   newSiteUrl: string = '';
   columnOrders: SiteColumnOrders;
@@ -28,18 +31,9 @@ export class SiteListComponent implements OnInit, OnChanges {
     }
   };
 
-  set selectedProfile(profile: Profile | undefined) {
-    this._selectedProfile = profile;
-    this.resetModifiedProfile();
-  }
-
-  get selectedProfile(): Profile | undefined {
-    return this._selectedProfile;
-  }
-
   constructor(
     private profileService: ProfileService,
-    private ngZone: NgZone
+    private store: Store
   ) {
     this.columnOrders = {
       sites: SortOrder.NONE,
@@ -47,30 +41,11 @@ export class SiteListComponent implements OnInit, OnChanges {
     }
   }
 
-  async ngOnChanges(changes: SimpleChanges) {
-    if (changes.selectedProfileName) {
-      const profiles = await this.profileService.getProfiles();
-      this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-    }
-  }
-
   async ngOnInit(): Promise<void> {
-    this.ngZone.run(() => {
-      this.profileService.onProfilesUpdated().subscribe(profiles => {
-        if (!profiles) {
-          return;
-        }
-        this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-      });
+    this.store.select(selectSelectedProfile).subscribe(x => {
+      this.selectedProfile = x
+      this.modifiedProfile = deepCopy(this.selectedProfile);
     });
-  }
-
-  resetModifiedProfile(): void {
-    if (!this.selectedProfile) {
-      this.modifiedProfile = undefined;
-    } else {
-      this.modifiedProfile = JSON.parse(JSON.stringify(this.selectedProfile));
-    }
   }
 
   async handleAddSite(): Promise<void> {
@@ -88,7 +63,7 @@ export class SiteListComponent implements OnInit, OnChanges {
     const success = await this.profileService.updateProfile(
       this.modifiedProfile!, this.selectedProfile!);
     if (!success) {
-      this.resetModifiedProfile();
+      this.modifiedProfile = deepCopy(this.selectedProfile);
     }
   }
 

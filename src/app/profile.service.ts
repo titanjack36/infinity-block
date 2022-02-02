@@ -1,97 +1,57 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { BlockMode, Profile, Site } from '../models/profile.interface';
-import { sendAction } from '../utils/utils';
-import { Action, Response, Request } from '../models/message.interface';
+import { Injectable } from "@angular/core";
+import { Store } from "@ngrx/store";
+import { Observable } from "rxjs";
+import { Action, Response, Request } from "src/models/message.interface";
+import { BlockMode, Profile, Site } from "src/models/profile.interface";
+import { deepCopy, sendAction } from "src/utils/utils";
+import { profilesError } from "./state/profiles/profiles.actions";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
 
-  profilesUpdated: BehaviorSubject<Profile[] | undefined> = 
-    new BehaviorSubject<Profile[] | undefined>(undefined);
-  error: BehaviorSubject<string> = new BehaviorSubject('');
+  constructor(private store: Store) {}
 
-  _profiles: Profile[] | undefined;
-  _pendingProfilesResponse: Promise<Response> | undefined;
+  getProfiles(): Observable<Profile[]> {
+    return new Observable(subscriber => {
+      sendAction(Action.GET_PROFILES).then(response => {
+        if (response.error || !response.body) {
+          subscriber.error(`Failed to fetch profiles: ${response.error?.message}`);
+        }
+        subscriber.next(response.body);
+      });
+      
+      chrome.runtime.onMessage.addListener(
+        (request: Request, sender: chrome.runtime.MessageSender, sendResponse) => {
+          // only accept messages from back end
+          if (sender.tab !== undefined) {
+            sendResponse();
+            return true;
+          }
   
-  /**
-   * initialize profile service and listen for profile updates
-   * from background
-   */
-  constructor() {
-    chrome.runtime.onMessage.addListener(
-      (request: Request, sender: chrome.runtime.MessageSender, sendResponse) => {
-        // only accept messages from back end
-        if (sender.tab !== undefined) {
+          if (request?.action === Action.NOTIFY_PROFILES_UPDATED) {
+            subscriber.next(request.body);
+          }
           sendResponse();
           return true;
         }
-
-        if (request?.action === Action.NOTIFY_PROFILES_UPDATED) {
-          this._profiles = request.body;
-          this.profilesUpdated.next(this._profiles);
-        }
-        sendResponse();
-        return true;
-      }
-    );
+      );
+    });
   }
 
-  /**
-   * @returns the updated profiles
-   */
-  onProfilesUpdated(): Observable<Profile[] | undefined> {
-    return this.profilesUpdated.asObservable();
+  dispatchError(errorMsg: string | undefined): void {
+    this.store.dispatch(profilesError({ error: errorMsg }));
   }
 
-  /**
-   * @returns the broadcasted error message
-   */
-  onError(): Observable<string> {
-    return this.error.asObservable();
-  }
-
-  /**
-   * @param errorMsg the error message to be broadcasted
-   */
-  broadcastError(errorMsg: string): void {
-    this.error.next(errorMsg);
-  }
-
-  /**
-   * If local list of profiles exists, return it
-   * Otherwise, fetch the list of profiles from background
-   * @returns a list of profiles
-   */
-  async getProfiles(): Promise<Profile[]> {
-    if (this._profiles) {
-      return this._profiles;
-    }
-    // if multiple getProfile calls occur at once, only one
-    // request will be sent
-    if (!this._pendingProfilesResponse) {
-      this._pendingProfilesResponse = sendAction(Action.GET_PROFILES);
-    }
-    const response: Response = await this._pendingProfilesResponse;
-
-    if (response.error || !response.body) {
-      this.error.next(`Failed to fetch profiles: ${response.error?.message}`);
-      return [];
-    }
-    this._profiles = response.body;
-    return this._profiles!;
-  }
-  
   /**
    * Construct new profile
    * @param profileName the name of the profile to be added
    * @returns whether the profile has been successfully added
    */
-  async addProfile(profileName: string): Promise<boolean> {
+  async addEmptyProfile(profileName: string): Promise<boolean> {
     if (profileName.length == 0) {
-      this.error.next('New profile name cannot be empty');
+      this.dispatchError('New profile name cannot be empty');
       return false;
     }
     const newProfile: Profile = {
@@ -110,9 +70,13 @@ export class ProfileService {
         }
       }
     }
+    return await this.addProfile(newProfile);
+  }
+
+  async addProfile(newProfile: Profile): Promise<boolean> {
     const response: Response = await sendAction(Action.ADD_PROFILE, newProfile);
     if (response.error) {
-      this.error.next(`Failed to add profile: ${response.error.message}`);
+      this.dispatchError(`Failed to add profile: ${response.error.message}`);
       return false;
     }
     return true;
@@ -126,14 +90,14 @@ export class ProfileService {
    */
   async addSite(profile: Profile, siteUrl: string): Promise<boolean> {
     if (siteUrl.length == 0) {
-      this.error.next('New site URL cannot be empty');
+      this.dispatchError('New site URL cannot be empty');
       return false;
     }
     if (profile.sites.find(s => s.url === siteUrl)) {
-      this.error.next('Site with URL already exists');
+      this.dispatchError('Site with URL already exists');
       return false;
     }
-    const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
+    const modifiedProfile: Profile = deepCopy(profile);
     modifiedProfile.sites.push({
       url: siteUrl,
       useRegex: false,
@@ -149,7 +113,7 @@ export class ProfileService {
    * @returns whether the site was successfully removed from the profile site list
    */
   async removeSite(profile: Profile, site: Site): Promise<boolean> {
-    const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
+    const modifiedProfile: Profile = deepCopy(profile);
     modifiedProfile.sites = profile.sites.filter(s => s.url !== site.url);
     return await this.updateProfile(modifiedProfile, profile);
   }
@@ -170,7 +134,7 @@ export class ProfileService {
       doNotNotify
     });
     if (response.error) {
-      this.error.next(`Failed to update profile: ${response.error.message}`);
+      this.dispatchError(`Failed to update profile: ${response.error.message}`);
       return false;
     }
     return true;
@@ -183,10 +147,10 @@ export class ProfileService {
    */
   async updateProfileName(profile: Profile, newProfileName: string): Promise<boolean> {
     if (!newProfileName) {
-      this.error.next('Profile name cannot be empty');
+      this.dispatchError('Profile name cannot be empty');
       return false;
     }
-    const modifiedProfile: Profile = JSON.parse(JSON.stringify(profile));
+    const modifiedProfile: Profile = deepCopy(profile);
     modifiedProfile.name = newProfileName;
     return await this.updateProfile(modifiedProfile, profile);
   }
@@ -198,7 +162,7 @@ export class ProfileService {
   async removeProfile(profile: Profile): Promise<boolean> {
     const response: Response = await sendAction(Action.REMOVE_PROFILE, profile.name);
     if (response.error) {
-      this.error.next(`Failed to remove profile: ${response.error.message}`);
+      this.dispatchError(`Failed to remove profile: ${response.error.message}`);
       return false;
     }
     return true;

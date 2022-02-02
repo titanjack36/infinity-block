@@ -23,7 +23,7 @@
         <img class="drag-handle" src="assets/drag.svg" alt="Drag" cdkDragHandle>
         <div 
           class="statusCircle"
-          [class.active]="activeProfiles.hasName(profileName)">
+          [class.active]="activeProfiles.includes(profileName)">
         </div>
         <div class="name overflowable">{{ profileName }}</div>
       </a>
@@ -70,9 +70,16 @@
     (keyup.enter)="handleAddProfile()"
     #newProfileInput
   >
-  <div class="btn-group">
-    <button class="text-btn secondary" (click)="hideNewProfileModal()">Cancel</button>
-    <button class="text-btn" (click)="handleAddProfile()">Add</button>
+  <p *ngIf="profileImportFileName">Importing profile from <b>{{ profileImportFileName }}</b></p>
+  <div class="actions btn-group ends">
+    <div class="text-btn secondary file-upload" for="file">
+      <input type="file" (change)="handleImportProfile($event)">
+      <p>Import from File</p>
+    </div>
+    <div class="btn-group right">
+      <button class="text-btn secondary" (click)="hideNewProfileModal()">Cancel</button>
+      <button class="text-btn" (click)="handleAddProfile()">Add</button>
+    </div>
   </div>
 </app-modal>
 

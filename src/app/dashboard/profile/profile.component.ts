@@ -1,6 +1,8 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { selectSelectedProfile } from 'src/app/state/profiles/profiles.selector';
 import Timer from 'src/utils/timer';
+import { deepCopy } from 'src/utils/utils';
 import { Profile } from '../../../models/profile.interface';
 import { ProfileService } from '../../profile.service';
 
@@ -9,12 +11,12 @@ import { ProfileService } from '../../profile.service';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent implements OnInit, OnChanges {
+export class ProfileComponent implements OnInit {
 
   @ViewChild('profileNameInput') profileNameInput: any;
   @Input() selectedProfileName!: string;
   @Output() onCreateProfile = new EventEmitter<void>();
-  _selectedProfile: Profile | undefined;
+  selectedProfile: Profile | undefined;
   modifiedProfile: Profile | undefined;
   newSiteUrl: string = '';
   editedProfileName: string = '';
@@ -27,7 +29,7 @@ export class ProfileComponent implements OnInit, OnChanges {
 
   constructor(
       private profileService: ProfileService,
-      private ngZone: NgZone) {
+      private store: Store) {
     this.waitTimer.attachCallback((timeInSecs: number) => {
       this.waitTimeRemaining = timeInSecs;
       if (timeInSecs === 0) {
@@ -36,39 +38,11 @@ export class ProfileComponent implements OnInit, OnChanges {
     });
   }
 
-  set selectedProfile(profile: Profile | undefined) {
-    this._selectedProfile = profile;
-    this.resetModifiedProfile();
-  }
-
-  get selectedProfile(): Profile | undefined {
-    return this._selectedProfile;
-  }
-
-  async ngOnChanges(changes: SimpleChanges) {
-    if (changes.selectedProfileName) {
-      const profiles = await this.profileService.getProfiles();
-      this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-    }
-  }
-
   async ngOnInit(): Promise<void> {
-    this.ngZone.run(() => {
-      this.profileService.onProfilesUpdated().subscribe(profiles => {
-        if (!profiles) {
-          return;
-        }
-        this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-      });
+    this.store.select(selectSelectedProfile).subscribe(x => {
+      this.selectedProfile = x
+      this.modifiedProfile = deepCopy(this.selectedProfile);
     });
-  }
-
-  resetModifiedProfile(): void {
-    if (!this.selectedProfile) {
-      this.modifiedProfile = undefined;
-    } else {
-      this.modifiedProfile = JSON.parse(JSON.stringify(this.selectedProfile));
-    }
   }
 
   async handleAddSite(): Promise<void> {
@@ -76,7 +50,7 @@ export class ProfileComponent implements OnInit, OnChanges {
     if (await this.profileService.addSite(this.modifiedProfile!, trimmedUrl)) {
       this.newSiteUrl = '';
     } else {
-      this.resetModifiedProfile();
+      this.modifiedProfile = deepCopy(this.selectedProfile);
     }
   }
 
@@ -84,7 +58,7 @@ export class ProfileComponent implements OnInit, OnChanges {
     const success = await this.profileService.updateProfile(
       this.modifiedProfile!, this.selectedProfile!);
     if (!success) {
-      this.resetModifiedProfile();
+      this.modifiedProfile = deepCopy(this.selectedProfile);
     }
   }
 

@@ -1,23 +1,26 @@
-import { Component, EventEmitter, Input, NgZone, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import format from 'date-fns/format';
-import { getTimeInSecs, parseTime } from 'src/utils/utils';
+import { deepCopy, getTimeInSecs, parseTime } from 'src/utils/utils';
 import { BlockMode, Challenge, Profile, SchedEventType, Schedule } from '../../../models/profile.interface';
 import { ProfileService } from '../../profile.service';
 import { Option } from '../../select-menu/select-menu.component';
 import helpData from '../../../data/help.json';
+import { Store } from '@ngrx/store';
+import { selectProfileNames, selectSelectedProfile } from 'src/app/state/profiles/profiles.selector';
+import { filter, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile-options',
   templateUrl: './profile-options.component.html',
   styleUrls: ['./profile-options.component.css']
 })
-export class ProfileOptionsComponent implements OnInit, OnChanges {
+export class ProfileOptionsComponent implements OnInit {
 
   @Input() selectedProfileName!: string;
   @Output() onHideOptions = new EventEmitter<void>();
-  _selectedProfile: Profile | undefined;
+  selectedProfile: Profile | undefined;
   modifiedProfile: Profile | undefined;
   confirmDeleteModalOpen: boolean = false;
   selectedHelp: keyof typeof helpData | undefined;
@@ -32,16 +35,7 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     private router: Router,
     private profileService: ProfileService,
     private sanitizer: DomSanitizer,
-    private ngZone: NgZone) { }
-
-  set selectedProfile(profile: Profile | undefined) {
-    this._selectedProfile = profile;
-    this.resetModifiedProfile();
-  }
-
-  get selectedProfile(): Profile | undefined {
-    return this._selectedProfile;
-  }
+    private store: Store) { }
 
   get schedule(): Schedule | undefined {
     return this.modifiedProfile?.options.schedule;
@@ -70,38 +64,18 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     return helpData[this.selectedHelp];
   }
 
-  async ngOnChanges(changes: SimpleChanges) {
-    if (changes.selectedProfileName) {
-      const profiles = await this.profileService.getProfiles();
-      this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-    }
-  }
-
   async ngOnInit(): Promise<void> {
-    this.ngZone.run(() => {
-      this.profileService.onProfilesUpdated().subscribe(profiles => {
-        if (!profiles) {
-          return;
-        }
-  
-        this.selectedProfile = profiles.find(p => p.name === this.selectedProfileName);
-      });
+    this.store.select(selectSelectedProfile).subscribe(x => {
+      this.selectedProfile = x
+      this.modifiedProfile = deepCopy(this.selectedProfile);
     });
-  }
-
-  resetModifiedProfile(): void {
-    if (!this.selectedProfile) {
-      this.modifiedProfile = undefined;
-    } else {
-      this.modifiedProfile = JSON.parse(JSON.stringify(this.selectedProfile));
-    }
   }
 
   async handleUpdateProfile(): Promise<void> {
     const success = await this.profileService.updateProfile(
       this.modifiedProfile!, this.selectedProfile!);
     if (!success) {
-      this.resetModifiedProfile();
+      this.modifiedProfile = deepCopy(this.selectedProfile);
     }
   }
 
@@ -110,7 +84,11 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
     const success = await this.profileService.updateProfileName(
       this.selectedProfile!, trimmedName);
     if (success) {
-      this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
+      this.store.select(selectProfileNames)
+        .pipe(filter(x => x.includes(trimmedName)), take(1))
+        .subscribe(_ => {
+          this.router.navigate(['.'], { queryParams: { profile: trimmedName }})
+        });
     }
   }
 
@@ -202,7 +180,7 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
 
   async handleImportSites(event: any): Promise<void> {
     if (!event.target?.files?.length) {
-      this.profileService.broadcastError('Import failed, file not found.');
+      this.profileService.dispatchError('Import failed, file not found.');
     }
     try {
       const content = await event.target.files.item(0)?.text();
@@ -210,7 +188,7 @@ export class ProfileOptionsComponent implements OnInit, OnChanges {
       this.modifiedProfile!.sites = sites;
       this.handleUpdateProfile();
     } catch (err: any) {
-      this.profileService.broadcastError(`Failed to parse file: ${err.message}`);
+      this.profileService.dispatchError(`Failed to parse file: ${err.message}`);
     }
   }
 
