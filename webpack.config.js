@@ -1,5 +1,16 @@
 const path = require('path');
 const FileManagerPlugin = require('filemanager-webpack-plugin');
+require('dotenv').config();
+
+const isDevEnv = process.env.ENVIRONMENT === 'dev';
+
+const devOptions = {
+  optimization: {
+    minimize: false
+  },
+  devtool : 'source-map'
+};
+const prodOptions = {};
 
 const BUILD_DIR = path.resolve(__dirname, 'dist');
 const SRC_DIR = path.resolve(__dirname, 'src');
@@ -43,11 +54,8 @@ module.exports = {
       }
     })
   ],
-  mode: 'development',
-  optimization: {
-    minimize: false
-  },
-  devtool : 'source-map',
+  mode: (isDevEnv ? 'development' : 'production'),
+  ...(isDevEnv ? devOptions : prodOptions),
   watchOptions: {
     ignored: /node_modules/,
   }
