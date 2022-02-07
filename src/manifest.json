@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Infinity Block",
-  "description": "Website Blocker for Chrome",
+  "name": "Infinity Block Dev",
+  "description": "Block out distracting sites. Get work done.",
   "version": "1.0.0",
   "icons": {
     "16": "app/assets/app_icon_16.png",

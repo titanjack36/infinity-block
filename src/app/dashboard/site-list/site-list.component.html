@@ -1,0 +1,34 @@
+<div class="table">
+  <div class="row header">
+    <div class="cell sortable site-url">
+      <button (click)="handleToggleSort('sites')">
+        <h3>Site</h3><img [src]="getSortIconPath('sites')">
+      </button>
+    </div>
+    <div class="cell sortable date-created">
+      <button (click)="handleToggleSort('dateCreated')">
+        <h3>Created Since</h3><img [src]="getSortIconPath('dateCreated')">
+      </button>
+    </div>
+    <div class="cell action-group"><h3>Actions</h3></div>
+  </div>
+  <div class="row" *ngFor="let site of getSortedSites()">
+    <div class="cell site-url">
+      <div class="overflowable" [title]="site.url">{{ site.url }}</div>
+    </div>
+    <div class="cell date-created" [title]="getFormattedDate(site.dateCreated)">
+      {{ getElapsedTime(site.dateCreated) }}
+    </div>
+    <div class="cell action-group">
+      <label class="regex-toggle icon-btn" [title]="site.useRegex ? 'Disable Regex Matching' : 'Enable Regex Matching'">
+        <img 
+          [src]="site.useRegex ? 'assets/regex-enabled.svg' : 'assets/regex-disabled.svg'"
+          [alt]="site.useRegex ? 'Disable Regex' : 'Enable Regex'">
+        <input type="checkbox" [(ngModel)]="site.useRegex" (change)="handleUpdateProfile()">
+      </label>
+      <button class="remove-site-btn icon-btn" (click)="handleRemoveSite(site)" title="Remove Site">
+        <img src="assets/close.svg" alt="Remove Site">
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,43 +1,85 @@
-<div id="leftbar">
-  <img src="assets/logo.svg" alt="Infinity Block" width="175">
-  <h3>Profiles</h3>
-  <a
-    *ngFor="let profileName of profileNames"
-    class="profile"
-    [class.selected]="profileName == getSelectedProfileName()"
-    routerLink="./"
-    [queryParams]="{profile: profileName}"
-  >
-    <span 
-      class="statusCircle"
-      [class.active]="activeProfiles.hasName(profileName)">
-    </span>
-    {{ profileName }}
-  </a>
-  <button id="addProfileBtn" (click)="showNewProfileModal()">
-    <img src="assets/plus.svg" alt="Add Profile">
-  </button>
+<div class="leftbar">
+  <div class="top">
+    <div class="logo">
+      <img class="logo-icon" src="assets/infinity-logo.svg" alt="Infinity Block">
+      BLOCK
+    </div>
+    <h3>Profiles</h3>
+    <div class="selector" #selector></div>
+    <div class="profiles" (scroll)="handleDeselect()" (cdkDropListDropped)="handleDrop($event)" cdkDropList>
+      <a
+        *ngFor="let profileName of profileNames"
+        class="profile-selection"
+        (mouseenter)="handleSelect($event)"
+        (mouseleave)="handleDeselect()"
+        (mousedown)="this.isDragging = true"
+        [class.selected]="profileName == selectedProfileName"
+        routerLink="./"
+        [queryParams]="{profile: profileName}"
+        [attr.data-profile-name]="profileName"
+        cdkDrag
+      >
+        <div class="marker"></div>
+        <img class="drag-handle" src="assets/drag.svg" alt="Drag" cdkDragHandle>
+        <div 
+          class="statusCircle"
+          [class.active]="activeProfiles.includes(profileName)">
+        </div>
+        <div class="name overflowable">{{ profileName }}</div>
+      </a>
+    </div>
+    <button *ngIf="selectedProfileName" class="text-btn new-profile" 
+        (click)="showNewProfileModal()">
+      New Profile
+    </button>
+  </div>
+  <div class="bottom">
+    <a class="text-btn secondary" 
+        [href]="reportFormUrl" 
+        target="_blank" rel="noopener noreferrer">
+      Report a Problem
+    </a>
+    <div class="version">Version {{version}}</div>
+  </div>
 </div>
-<app-profile (onCreateProfile)="showNewProfileModal()">
+<app-profile *ngIf="selectedProfileName; else showPrompt" 
+  [selectedProfileName]="selectedProfileName" (onCreateProfile)="showNewProfileModal()">
 </app-profile>
+<ng-template #showPrompt>
+  <div class="create-profile-prompt">
+    <img src="assets/empty.svg" alt="Empty">
+    <h3>No Profiles</h3>
+    <button class="text-btn new-profile" (click)="showNewProfileModal()">
+      New Profile
+    </button>
+  </div>
+</ng-template>
 
 <app-modal
   id="newProfileModal"
   [showModal]="newProfileModalOpen"
   (onHideModal)="hideNewProfileModal()"
   >
-  <h1 class="title">New Profile</h1>
-  <label for="newProfileNameInput">Profile Name</label>
+  <h2 class="title">New Profile</h2>
+  <h3>Profile Name</h3>
   <input
     type="text"
     id="newProfileNameInput"
     class="textfield"
     [(ngModel)]="newProfileName"
     (keyup.enter)="handleAddProfile()"
+    #newProfileInput
   >
-  <div class="btn-group">
-    <button class="text-btn" (click)="hideNewProfileModal()">Cancel</button>
-    <button class="text-btn" (click)="handleAddProfile()">Add</button>
+  <p *ngIf="profileImportFileName">Importing profile from <b>{{ profileImportFileName }}</b></p>
+  <div class="actions btn-group ends">
+    <div class="text-btn secondary file-upload" for="file">
+      <input type="file" (change)="handleImportProfile($event)">
+      <p>Import from File</p>
+    </div>
+    <div class="btn-group right">
+      <button class="text-btn secondary" (click)="hideNewProfileModal()">Cancel</button>
+      <button class="text-btn" (click)="handleAddProfile()">Add</button>
+    </div>
   </div>
 </app-modal>
 
@@ -46,7 +88,7 @@
   [showModal]="errorModalOpen"
   (onHideModal)="hideErrorModal()"
 >
-  <h1 class="title">Error</h1>
+  <h2 class="title">Error</h2>
   <div class="body">{{ errorMsg }}</div>
   <button class="text-btn" (click)="hideErrorModal()">OK</button>
 </app-modal>

@@ -1,0 +1,57 @@
+<div class="profile-wrapper" *ngIf="selectedProfile && modifiedProfile">
+  <div class="profile">
+    <div class="top">
+      <div class="title-group">
+        <h1>{{ selectedProfile.name }}</h1>
+        <div class="status-tag" [class.enabled]="selectedProfile.options.isActive">
+          {{ selectedProfile.options.isActive ? 'On' : 'Off'}}
+        </div>
+      </div>
+      <div class="action-group">
+        <button class="text-btn" (click)="handleToggleEnableProfile()">
+          {{ selectedProfile.options.isActive ? 'Disable' : 'Enable'}}
+        </button>
+        <button class="text-btn secondary settings" [class.hide]="showOptions" 
+            (click)="handleShowOptions()">
+          <img src="assets/settings.svg" alt="Settings">
+        </button>
+      </div>
+    </div>
+    <h3>Sites</h3>
+    <div class="input-button-form">
+      <input
+        id="newSiteUrlField"
+        placeholder="www.example.com"
+        type="text"
+        class="textfield"
+        [(ngModel)]="newSiteUrl"
+        (keyup.enter)="handleAddSite()"
+      >
+      <button class="text-btn" (click)="handleAddSite()">Add Site</button>
+    </div>
+
+    <app-site-list [selectedProfileName]="selectedProfileName"></app-site-list>
+    <div *ngIf="selectedProfile.sites.length === 0" class="prompt">
+      Added sites will appear here.
+    </div>
+  </div>
+  <app-profile-options [class.hide]="!showOptions" [selectedProfileName]="selectedProfileName" 
+    (onHideOptions)="handleHideOptions()">
+  </app-profile-options>
+</div>
+
+<app-modal
+  id="challengeModal"
+  [showModal]="challengeModalOpen"
+  (onHideModal)="handleHideChallengeModal()"
+>
+  <h2 class="title">Wait!</h2>
+  <div class="body">Thinking of procrastinating? Consider going for a walk.</div>
+  <div class="actions btn-group right">
+    <button class="text-btn" (click)="handleHideChallengeModal()">Cancel</button>
+    <button class="text-btn" (click)="handleDisableProfile()" [disabled]="!allowDisable">
+      Continue
+      <span *ngIf="!allowDisable"> | {{ waitTimeRemaining }}</span>
+    </button>
+  </div>
+</app-modal>

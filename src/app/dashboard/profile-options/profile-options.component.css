@@ -1,0 +1,204 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: width 0.5s;
+  transition-timing-function: cubic-bezier(.17,.67,.36,1);
+  overflow-x: hidden;
+  flex-shrink: 0;
+  width: 350px;
+  background-color: var(--background-secondary);
+}
+
+:host.hide {
+  width: 0;
+}
+
+.options {
+  padding: 20px;
+  font-size: 15px;
+  width: 350px;
+}
+
+#confirmDeleteModal .body {
+  margin-bottom: 25px;
+}
+
+.options .title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.options .title img {
+  width: 12px;
+}
+
+.options .title h2 {
+  margin-top: 20px;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.section h3 .icon-btn {
+  visibility: hidden;
+  display: inline-flex;
+  vertical-align: middle;
+  margin-bottom: 4px;
+}
+
+.section:hover h3 .icon-btn {
+  visibility: visible;
+}
+
+.section h3 img {
+  width: 18px;
+}
+
+.blockmode-choices input {
+  display: none;
+}
+
+.name.section input {
+  flex-grow: 1;
+}
+
+.name.section button {
+  margin-left: 10px;
+}
+
+.name.section > div {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.blockmode-choices label {
+  cursor: pointer;
+  width: 100%;
+  color: var(--on-background);
+  background-color: var(--background-3);
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  height: 45px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.blockmode-choices label > img {
+  width: 20px;
+  visibility: hidden;
+}
+
+.blockmode-choices label:hover {
+  background-color: var(--background-secondary-hover);
+}
+
+.blockmode-choices input:checked + label {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.blockmode-choices input:checked + label > img {
+  visibility: visible;
+}
+
+.title-with-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.title-with-toggle .toggle-switch {
+  font-size: 13px;
+}
+
+.title-with-toggle h3 {
+  margin: 0;
+}
+
+app-select-menu {
+  width: 100px;
+}
+
+.sched-event-container {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.sched-event {
+  display: flex;
+  align-items: center;
+}
+
+.sched-event > p {
+  margin: 0 10px;
+}
+
+.sched-event-error {
+  color: var(--danger);
+}
+
+.date-input {
+  font-size: 15px;
+  padding: 10px;
+  width: 80px;
+}
+
+#addEventBtn {
+  width: 100%;
+}
+
+#removeEventBtn {
+  margin-left: auto;
+}
+
+#removeEventBtn > img {
+  width: 15px;
+}
+
+.action.section .text-btn {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.wait-time-input {
+  font-size: 15px;
+  padding: 10px;
+  width: 50px;
+  margin: 0 5px;
+}
+
+.disabled-prompt {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  padding: 20px;
+  width: 350px;
+  text-align: center;
+  color: var(--on-background-muted);
+}
+
+.disabled-prompt img {
+  margin-bottom: 10px;
+  width: 60px;
+}
+
+
+@media only screen and (max-width: 1200px) {
+  :host {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+  }
+}

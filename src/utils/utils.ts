@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 import { Action, Request, Response } from '../models/message.interface';
-import { setHours, setMinutes } from 'date-fns';
+import { setHours, setMinutes, setSeconds } from 'date-fns';
 
 export async function sendAction(action: Action, body?: any): Promise<Response> {
   return new Promise((resolve, reject) => {
@@ -12,23 +12,6 @@ export async function sendAction(action: Action, body?: any): Promise<Response> 
         resolve(response);
       }
     });
-  });
-}
-
-export function receiveMessage(handler: (request: Request, sender: chrome.runtime.MessageSender) => Promise<any>): void {
-  chrome.runtime.onMessage.addListener((request: Request, sender, sendResponse) => {
-    const response: Response = {};
-    handler(request, sender)
-      .then(body => {
-        response.body = body;
-        sendResponse(response)
-      })
-      .catch(err => {
-        console.error(err);
-        response.error = { message: err.message };
-        sendResponse(response);
-      });
-    return true;
   });
 }
 
@@ -67,7 +50,7 @@ export function isValidUrl(str: string): boolean {
   return !!pattern.test(str);
 }
 
-export function parseTime(timeStr: string | undefined): Date | undefined {
+export function parseTime(timeStr: string | undefined): string | undefined {
   if (!timeStr) {
     return undefined;
   }
@@ -80,10 +63,21 @@ export function parseTime(timeStr: string | undefined): Date | undefined {
   const [hours, minutes, ampm] = match.slice(1, 4);
   date = setHours(date, parseInt(hours) + (ampm == 'am' ? 0 : 12));
   date = setMinutes(date, parseInt(minutes));
-  return date;
+  date = setSeconds(date, 0);
+  return date.toString();
 }
 
-export function getTimeInSecs(time: Date) {
+export function getTimeInSecs(time: string) {
   const date = new Date(time);
   return date.getHours() * 3600 + date.getMinutes() * 60;
+}
+
+export function deepCopy(obj: any) {
+  if (obj === undefined) {
+    return undefined;
+  } else if (obj === null) {
+    return null;
+  } else {
+    return JSON.parse(JSON.stringify(obj));
+  }
 }

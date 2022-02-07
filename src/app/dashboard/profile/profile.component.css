@@ -1,0 +1,129 @@
+:host {
+  flex-grow: 1;
+  height: 100%;
+  min-width: 0;
+}
+
+.profile-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.top {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.top .title-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+  margin-right: 20px;
+}
+
+.top .title-group h1 {
+  margin: 0;
+  margin-right: 20px;
+  word-wrap: break-word;
+  min-width: 0;
+}
+
+.top .action-group {
+  display: flex;
+  flex-direction: row;
+}
+
+.top .action-group .settings {
+  padding: 10px;
+  margin-left: 10px;
+  overflow: hidden;
+  transition: width 0.5s, padding 0.5s, border 0.5s, margin 0.5s, opacity 0.5s;
+  transition-timing-function: cubic-bezier(.17,.67,.36,1);
+  width: 43px;
+}
+
+.top .action-group .settings.hide {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  margin: 0;
+  opacity: 0;
+}
+
+.top .action-group .settings img {
+  width: 20px;
+}
+
+.status-tag {
+  border-radius: 100px;
+  width: 35px;
+  height: 20px;
+  background: var(--background-3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.status-tag.enabled {
+  color: var(--on-enabled);
+  background-color: var(--enabled);
+}
+
+.title-wrapper img {
+  width: 25px;
+}
+
+.title-wrapper > button:not(:last-child) {
+  margin-right: 20px;
+}
+
+.title-wrapper {
+  display: flex;
+  flex-direction: row;
+}
+
+.title-wrapper .textfield {
+  font-size: 50px;
+  font-weight: bold;
+  margin-right: 20px;
+  padding: 10px;
+  padding-top: 0px;
+}
+
+.profile {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding: 50px;
+}
+
+.input-button-form {
+  display: flex;
+  flex-direction: row;
+}
+
+.input-button-form .textfield {
+  padding: 10px;
+  max-width: 400px;
+  min-width: 100px;
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+#confirmDeleteModal h1 {
+  margin-top: 0;
+}
+
+.prompt {
+  margin: 10px 0;
+  text-align: center;
+  color: var(--on-background-muted);
+  font-size: 12px;
+}
