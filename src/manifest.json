@@ -4,12 +4,12 @@
   "description": "Block out distracting sites. Get work done.",
   "version": "1.0.0",
   "icons": {
-    "16": "app/assets/dev_app_icon_16.png",
-    "48": "app/assets/dev_app_icon_48.png",
-    "128": "app/assets/dev_app_icon_128.png"
+    "16": "app/assets/app_icon_16.png",
+    "48": "app/assets/app_icon_48.png",
+    "128": "app/assets/app_icon_128.png"
   },
   "browser_action": {
-    "default_icon": "app/assets/dev_app_icon_16.png",
+    "default_icon": "app/assets/app_icon_16.png",
     "default_popup": "popup.html"
   },
   "background": {
