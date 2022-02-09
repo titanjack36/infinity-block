@@ -152,6 +152,7 @@ export class ProfileService {
     }
     const modifiedProfile: Profile = deepCopy(profile);
     modifiedProfile.name = newProfileName;
+    modifiedProfile.options.schedule.events.forEach(ev => ev.profileName = newProfileName);
     return await this.updateProfile(modifiedProfile, profile);
   }
 

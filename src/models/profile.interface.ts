@@ -17,8 +17,7 @@ export interface Profile {
 export interface Site {
   url: string;
   useRegex: boolean;
-  redirectUrl?: string;
-  dateCreated?: string;
+  dateCreated: string;
 }
 
 export interface Options {
