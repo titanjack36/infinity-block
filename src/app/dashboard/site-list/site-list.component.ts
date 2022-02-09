@@ -18,6 +18,7 @@ export class SiteListComponent implements OnInit {
   modifiedProfile: Profile | undefined;
   newSiteUrl: string = '';
   columnOrders: SiteColumnOrders;
+  elapsedTimeMap: Map<string, string> = new Map();
   columnComparators: ColumnComparators = {
     sites: function (a: Site, b: Site) { return a.url.localeCompare(b.url) },
     dateCreated: function (a: Site, b: Site) {
@@ -43,7 +44,7 @@ export class SiteListComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.store.select(selectSelectedProfile).subscribe(x => {
-      this.selectedProfile = x
+      this.selectedProfile = x;
       this.modifiedProfile = deepCopy(this.selectedProfile);
     });
   }
@@ -70,8 +71,13 @@ export class SiteListComponent implements OnInit {
   getElapsedTime(date?: string): string {
     if (!date) {
       return 'unknown';
+    } else if (this.elapsedTimeMap.has(date)) {
+      // we don't want elapsed time to change after it has been rendered
+      return this.elapsedTimeMap.get(date)!;
     } else {
-      return `${formatDistanceToNow(new Date(date))} ago`;
+      const elapsedTime = `${formatDistanceToNow(new Date(date))} ago`;
+      this.elapsedTimeMap.set(date, elapsedTime);
+      return elapsedTime;
     }
   }
 
