@@ -77,13 +77,6 @@
   background-color: var(--background-primary);
 }
 
-/* .profile-selection:hover {
-  background-color: var(--background-secondary-hover);
-  cursor: pointer;
-  width: fit-content;
-  min-width: 250px;
-} */
-
 .profile-selection,.profile-selection:visited {
   text-decoration: inherit;
   color: var(--on-background);
@@ -95,14 +88,14 @@
   margin-right: 6px;
   border-radius: 0 100px 100px 0;
   flex-shrink: 0;
-  z-index: 1001;
+  z-index: 1000;
 }
 
 .profile-selection .drag-handle {
   width: 8px;
   height: 100%;
   margin-right: 6px;
-  z-index: 1001;
+  z-index: 1000;
   opacity: 0;
   cursor: move;
   flex-shrink: 0;
@@ -116,10 +109,6 @@
   margin: 0 15px;
 }
 
-/* .profile-selection:hover .name {
-  overflow: visible;
-} */
-
 .profile-selection .statusCircle {
   height: 10px;
   width: 10px;
@@ -128,28 +117,19 @@
   display: inline-block;
   flex-shrink: 0;
   margin: 15px 0;
-  z-index: 1001;
+  z-index: 1000;
 }
 
 .profile-selection .statusCircle.active {
   background-color: var(--enabled);
 }
 
-/* .profile-selection .expanded-text {
-  position: absolute;
-  top: 0;
-  left: 50px;
-  height: 48px;
-  background-color: var(--background-secondary-hover);
-  z-index: 1000;
-} */
-
 #newProfileModal .textfield {
   width: 350px;
 }
 
 #errorModal {
-  z-index: 1101;
+  z-index: 2100;
 }
 
 #errorModal button {
