@@ -26,9 +26,31 @@
           [alt]="site.useRegex ? 'Disable Regex' : 'Enable Regex'">
         <input type="checkbox" [(ngModel)]="site.useRegex" (change)="handleUpdateProfile()">
       </label>
+      <button class="edit-btn icon-btn" (click)="showEditSiteModal(site)" title="Edit Site URL">
+        <img src="assets/edit.svg" alt="Edit Site URL">
+      </button>
       <button class="remove-site-btn icon-btn" (click)="handleRemoveSite(site)" title="Remove Site">
         <img src="assets/close.svg" alt="Remove Site">
       </button>
     </div>
   </div>
 </div>
+
+<app-modal
+  id="editSiteModal"
+  [showModal]="editSiteModalOpen"
+  (onHideModal)="hideEditSiteModal()"
+  >
+  <h2 class="title">Edit Site URL</h2>
+  <input
+    type="text"
+    class="textfield"
+    [(ngModel)]="editedSiteUrl"
+    (keyup.enter)="handleEditSiteUrl()"
+    #newProfileInput
+  >
+  <div class="actions btn-group right">
+    <button class="text-btn secondary" (click)="hideEditSiteModal()">Cancel</button>
+    <button class="text-btn" (click)="handleEditSiteUrl()">OK</button>
+  </div>
+</app-modal>
