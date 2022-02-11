@@ -17,6 +17,9 @@ export class SiteListComponent implements OnInit {
   selectedProfile: Profile | undefined;
   modifiedProfile: Profile | undefined;
   newSiteUrl: string = '';
+  siteBeingEdited: Site | undefined;
+  editedSiteUrl: string = '';
+  editSiteModalOpen: boolean = false;
   columnOrders: SiteColumnOrders;
   elapsedTimeMap: Map<string, string> = new Map();
   columnComparators: ColumnComparators = {
@@ -60,6 +63,26 @@ export class SiteListComponent implements OnInit {
     this.profileService.removeSite(this.selectedProfile!, site)
   }
 
+  showEditSiteModal(site: Site): void {
+    this.editSiteModalOpen = true;
+    this.siteBeingEdited = site;
+    this.editedSiteUrl = site.url;
+  }
+
+  hideEditSiteModal(): void {
+    this.editSiteModalOpen = false;
+  }
+
+  handleEditSiteUrl(): void {
+    if (!this.editedSiteUrl) {
+      this.profileService.dispatchError('Site URL cannot be empty');
+      return;
+    }
+    this.siteBeingEdited!.url = this.editedSiteUrl;
+    this.editSiteModalOpen = false;
+    this.handleUpdateProfile();
+  }
+
   async handleUpdateProfile(): Promise<void> {
     const success = await this.profileService.updateProfile(
       this.modifiedProfile!, this.selectedProfile!);
@@ -71,14 +94,14 @@ export class SiteListComponent implements OnInit {
   getElapsedTime(date?: string): string {
     if (!date) {
       return 'unknown';
-    } else if (this.elapsedTimeMap.has(date)) {
+    }
+    if (this.elapsedTimeMap.has(date)) {
       // we don't want elapsed time to change after it has been rendered
       return this.elapsedTimeMap.get(date)!;
-    } else {
-      const elapsedTime = `${formatDistanceToNow(new Date(date))} ago`;
-      this.elapsedTimeMap.set(date, elapsedTime);
-      return elapsedTime;
     }
+    const elapsedTime = `${formatDistanceToNow(new Date(date))} ago`;
+    this.elapsedTimeMap.set(date, elapsedTime);
+    return elapsedTime;
   }
 
   getFormattedDate(date?: string): string {

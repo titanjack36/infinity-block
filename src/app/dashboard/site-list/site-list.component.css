@@ -85,20 +85,20 @@
   min-width: 200px;
 }
 
-.remove-site-btn > img {
-  width: 15px;
-}
-
 .action-group {
-  width: 100px;
-  min-width: 100px;
+  width: 125px;
+  min-width: 125px;
 }
 
 .action-group > div {
   display: flex;
 }
 
-.regex-toggle {
+.remove-site-btn > img,.edit-btn > img {
+  width: 15px;
+}
+
+.regex-toggle,.edit-btn {
   margin-right: 10px;
 }
 
@@ -108,4 +108,8 @@
 
 .regex-toggle > input {
   display: none;
+}
+
+#editSiteModal .textfield {
+  width: 500px;
 }

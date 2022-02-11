@@ -22,7 +22,7 @@ export class ModalComponent implements OnInit {
   @HostListener('document:keyup', ['$event'])
   handleKeypress(event: KeyboardEvent) {
     if (this.showModal && event.key == "Escape") {
-      this.onHideModal.emit();
+      this.closeModal();
     }
   }
 }
