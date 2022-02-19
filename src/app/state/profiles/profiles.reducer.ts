@@ -22,6 +22,9 @@ export const profilesReducer = createReducer(
   }),
   on(getProfiles, state => ({ ...state, isLoading: true })),
   on(setSelectedProfile, (state, { profileName }) => {
+    if (!profileName) {
+      return { ...state, selectedProfile: undefined };
+    }
     return {
       ...state,
       selectedProfile: Object.freeze(state.profiles.find(x => x.name === profileName))

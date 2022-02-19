@@ -87,15 +87,20 @@ export class ProfileOptionsComponent implements OnInit {
       this.store.select(selectProfileNames)
         .pipe(filter(x => x.includes(trimmedName)), take(1))
         .subscribe(_ => {
-          this.router.navigate(['.'], { queryParams: { profile: trimmedName }})
+          this.router.navigate(['.'], { queryParams: { profile: trimmedName }});
         });
     }
   }
 
   async handleRemoveProfile(): Promise<void> {
+    const removedProfileName = this.selectedProfile!.name;
     if (await this.profileService.removeProfile(this.selectedProfile!)) {
       this.hideConfirmDeleteModal();
-      this.router.navigate(['.']);
+      this.store.select(selectProfileNames)
+        .pipe(filter(x => !x.includes(removedProfileName)), take(1))
+        .subscribe(_ => {
+          this.router.navigate(['.']);
+        });
     }
   }
 
