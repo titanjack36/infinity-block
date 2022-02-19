@@ -24,9 +24,8 @@ export class ProfileService {
       
       chrome.runtime.onMessage.addListener(
         (request: Request, sender: chrome.runtime.MessageSender, sendResponse) => {
-          // only accept messages from back end
+          // ignore messages that do not come from background script
           if (sender.tab !== undefined) {
-            sendResponse();
             return true;
           }
   

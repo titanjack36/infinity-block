@@ -68,7 +68,7 @@ chrome.runtime.onMessage.addListener(
               return getTimeInSecs(ev1.time!) - getTimeInSecs(ev2.time!);
             });
           profiles[profileIdx].options.schedule.events = processedEvents;
-          eventScheduler.onProfilesUpdated(profiles);
+          eventScheduler.fetchPendingEvents(profiles);
     
           restoreBlockedTabs();
           blockTabsMatchingActive();
@@ -170,6 +170,7 @@ function init(savedState: any) {
     lastRecordedDate = new Date();
   }
   eventScheduler = new EventScheduler(lastRecordedDate);
+  eventScheduler.fetchPendingEvents(profiles!);
 
   eventScheduler.onEventTrigger((event: SchedEvent) => {
     if (event.eventType === SchedEventType.ENABLE) {
@@ -197,7 +198,7 @@ function init(savedState: any) {
     });
     saveProfiles();
     sendAction(Action.NOTIFY_PROFILES_UPDATED, profiles);
-    eventScheduler!.onProfilesUpdated(profiles!);
+    eventScheduler!.fetchPendingEvents(profiles!);
     // the next time the extension starts, it will compare
     // the time with this saved time to determine whether to reset
     // if dates are different
