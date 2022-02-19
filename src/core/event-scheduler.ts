@@ -24,12 +24,12 @@ export default class EventScheduler {
 
   /**
    * Updates pendingSchedEvents to contain all unexecuted events
-   * in the updatedProfiles
-   * @param updatedProfiles profiles that have been modified
+   * in the profiles
+   * @param profiles profiles containing the scheduled events
    */
-  onProfilesUpdated(updatedProfiles: Profile[]) {
+  fetchPendingEvents(profiles: Profile[]) {
     this.pendingSchedEvents = [];
-    updatedProfiles.forEach(profile => {
+    profiles.forEach(profile => {
       const schedule = profile.options.schedule;
       if (schedule.isEnabled) {
         // add all unexecuted scheduled events of profile
@@ -58,15 +58,15 @@ export default class EventScheduler {
   /**
    * Check if events need to be triggered.
    * An event is to be triggered if it has not been executed yet 
-   * (it is in the pendingSchedEvents list) but its trigger time 
-   * is less than the current time.
+   * (it is in the pendingSchedEvents list) but the current time 
+   * is equal to or has gone past its trigger time.
    * Do not trigger events if a handler is not attached.
    */
   async checkSchedEvents(): Promise<void> {
     const unexecutedEvents = [];
     for (const event of this.pendingSchedEvents) {
       if (this.eventHandler 
-          && getTimeInSecs(event.time!) < getTimeInSecs(new Date().toString())) {
+          && getTimeInSecs(new Date().toString()) >= getTimeInSecs(event.time!)) {
         try {
           this.eventHandler(event);
         } catch (err) {

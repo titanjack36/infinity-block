@@ -73,7 +73,7 @@
   <p *ngIf="profileImportFileName">Importing profile from <b>{{ profileImportFileName }}</b></p>
   <div class="actions btn-group ends">
     <div class="text-btn secondary file-upload" for="file">
-      <input type="file" (change)="handleImportProfile($event)">
+      <input type="file" (change)="handleImportProfile($event)" #profileImport>
       <p>Import from File</p>
     </div>
     <div class="btn-group right">

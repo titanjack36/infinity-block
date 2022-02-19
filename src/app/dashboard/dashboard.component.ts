@@ -22,6 +22,7 @@ export class DashboardComponent implements OnInit {
 
   @ViewChild('selector') selector: any;
   @ViewChild('newProfileInput') newProfileInput: any;
+  @ViewChild('profileImport') profileImport: any;
   profileNames: string[] = [];
   newProfileName: string = '';
   activeProfiles: string[] = [];
@@ -68,10 +69,12 @@ export class DashboardComponent implements OnInit {
             this.router.navigate(['.'], {
               queryParams: { profile: this.selectedProfileName }
             });
-            this.store.dispatch(setSelectedProfile({
-              profileName: this.selectedProfileName
-            }));
+          } else {
+            this.router.navigate(['.']);
           }
+          this.store.dispatch(setSelectedProfile({
+            profileName: this.selectedProfileName
+          }));
         });
       } else if (routeSub) {
         routeSub.unsubscribe();
@@ -124,6 +127,9 @@ export class DashboardComponent implements OnInit {
   }
 
   hideNewProfileModal(): void {
+    if (this.profileImport?.nativeElement) {
+      this.profileImport.nativeElement.value = null;
+    }
     this.newProfileModalOpen = false;
     this.newProfileName = '';
     this.profileImportFileName = '';

@@ -21,5 +21,5 @@ export const clearError = createAction(
 
 export const setSelectedProfile = createAction(
   '[Profiles] Set Selected Profile',
-  props<{ profileName: string }>()
+  props<{ profileName: string | undefined }>()
 );
