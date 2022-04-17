@@ -3,7 +3,7 @@ import { Profile } from "../models/profile.interface";
 import { sendAction } from "../utils/utils";
 
 document.getElementById('dashboardBtn')!.onclick = function () {
-  chrome.tabs.create({ url: chrome.extension.getURL('app/index.html') });
+  chrome.tabs.create({ url: chrome.runtime.getURL('app/index.html') });
 }
 
 async function init(): Promise<void> {
@@ -34,7 +34,7 @@ async function init(): Promise<void> {
     }
     profileItem.onclick = function () {
       chrome.tabs.create({ 
-        url: chrome.extension.getURL(`app/index.html#/dashboard?profile=${profile.name}`)
+        url: chrome.runtime.getURL(`app/index.html#/dashboard?profile=${profile.name}`)
       });
     }
     profileList.appendChild(profileItem);
