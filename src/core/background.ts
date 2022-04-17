@@ -11,7 +11,7 @@ let activeProfiles: ActiveProfiles | undefined = undefined;
 let eventScheduler: EventScheduler | undefined = undefined;
 let blockedTabIdMap: Map<number, string> = new Map();
 
-chrome.storage.sync.get(['profiles', 'lastRecordedDate'], result => {
+chrome.storage.local.get(['profiles', 'lastRecordedDate'], result => {
   if (!result) {
     return;
   }
@@ -210,7 +210,7 @@ function init(savedState: any) {
     // the next time the extension starts, it will compare
     // the time with this saved time to determine whether to reset
     // if dates are different
-    chrome.storage.sync.set({ 
+    chrome.storage.local.set({ 
       lastRecordedDate: JSON.stringify(new Date()) 
     }, () => {});
   });
@@ -326,5 +326,5 @@ function redirectTab(tab: chrome.tabs.Tab, redirectUrl = defaultRedirectUrl,
  * Save profile data to chrome storage
  */
 function saveProfiles(): void {
-  chrome.storage.sync.set({ profiles }, () => {});
+  chrome.storage.local.set({ profiles }, () => {});
 }
