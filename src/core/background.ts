@@ -4,7 +4,7 @@ import { getAllTabs, getTab, getTimeInSecs, sendAction } from '../utils/utils';
 import ActiveProfiles from './active-profile';
 import EventScheduler from './event-scheduler';
 
-const defaultRedirectUrl: string = `${chrome.extension.getURL('app/index.html')}#/block`
+const defaultRedirectUrl: string = `${chrome.runtime.getURL('app/index.html')}#/block`
 
 let profiles: Profile[] | undefined = undefined;
 let activeProfiles: ActiveProfiles | undefined = undefined;
