@@ -25,15 +25,15 @@ export class ProfileService {
       chrome.runtime.onMessage.addListener(
         (request: Request, sender: chrome.runtime.MessageSender, sendResponse) => {
           // ignore messages that do not come from background script
-          if (sender.tab !== undefined) {
+          if (sender.url?.includes('background.js')) {
+            if (request?.action === Action.NOTIFY_PROFILES_UPDATED) {
+              subscriber.next(request.body);
+            }
+            sendResponse();
             return true;
+          } else {
+            return false;
           }
-  
-          if (request?.action === Action.NOTIFY_PROFILES_UPDATED) {
-            subscriber.next(request.body);
-          }
-          sendResponse();
-          return true;
         }
       );
     });
